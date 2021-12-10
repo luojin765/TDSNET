@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 
 namespace CNChar
 {
@@ -16,9 +17,13 @@ namespace CNChar
 
             for (i = 0; i <= iLen - 1; i++)
             {
+                string c= CnStr.Substring(i, 1);
 
-                strTemp.Append(GetCharSpellCode(CnStr.Substring(i, 1)));
-
+                if (!SpellDict.ContainsKey(c))
+                {
+                    SpellDict.Add(c, GetCharSpellCode(c));                    
+                }
+                strTemp.Append(SpellDict[c]);
             }
 
             return strTemp.ToString();
@@ -30,10 +35,11 @@ namespace CNChar
         /// </summary>
         /// <param name="CnChar">单个汉字</param>
         /// <returns>单个大写字母</returns>
+        static Dictionary<string, string> SpellDict = new Dictionary<string, string>();
 
         private static string GetCharSpellCode(string CnChar)
         {
-
+            
             long iCnChar;
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             Encoding gb2312 = Encoding.GetEncoding("gb2312");

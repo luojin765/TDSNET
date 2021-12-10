@@ -245,7 +245,6 @@ namespace tdsCshapu
                 for (int i = 0; i < dri_nums; i++)
                 {
 
-
                     msg = ("建立索引..(" + volumes.ElementAt(i).Name.TrimEnd('\\').TrimEnd(':') + "盘)");
                     label1.BeginInvoke(new StatusInfo(ShowStatuesInfo), msg);
 
@@ -265,7 +264,6 @@ namespace tdsCshapu
 
                     fileList.Add(_usnJournal.Last().GetNtfsVolumeAllentries(i, volumes.ElementAt(i).Name.TrimEnd('\\'), out NtfsUsnJournal.UsnJournalReturnCode rtnCode));
 
-
                     
 
                     foreach (FrnFilePath f in fileList[i].Values)
@@ -277,12 +275,8 @@ namespace tdsCshapu
                             //遍历以获取文件时间；
                             //string path = string.Format("{0}:{1}\\{2}", f.VolumeName, GetPath(f), getfile(f.fileName));
                             //if (File.Exists(path)) {try{ f.DATA = -(DateTime.Now - File.GetLastAccessTime(path)).Days; } catch { f.DATA = 10000; }; }else if (Directory.Exists(path)) { try { f.DATA = -(DateTime.Now - Directory.GetLastAccessTime(path)).Days; } catch { f.DATA = 10000; }; }
-
-
-
+                                                        
                             string[] ext = f.fileName.Split('.');
-
-
 
                             if (ext.Last() == "LNK")
                             {
@@ -297,7 +291,6 @@ namespace tdsCshapu
                     }
 
                     fileList[i] = fileList[i].OrderByDescending(o => o.Value.QuanZhong).ToDictionary(p => p.Key, o => o.Value);
-
 
                 }
 
@@ -406,9 +399,10 @@ namespace tdsCshapu
                     string name = getfile(f.fileName);
                     string path = f.VolumeName + ":" + GetPath(f);
                     string path2 = path + "\\" + name;
+
                     if (f.IcoIndex.HasValue)
                     {
-                        e.Item = new ListViewItem(new string[] { name, path2 }, (int)f.IcoIndex);
+                        e.Item = new ListViewItem(new string[] { name, path2 }, f.IcoIndex.Value);
                     }
                     else
                     {
@@ -524,7 +518,7 @@ namespace tdsCshapu
             {
 
             Restart:
-                List<FrnFilePath> vvlist = new List<FrnFilePath>() { };      //listview 绑定的缓存
+                List<FrnFilePath> vvlist = new List<FrnFilePath>();      //listview 绑定的缓存
                 string[] dwords = null;
                 string[] words;
                 int dlen = 0;
@@ -628,17 +622,21 @@ namespace tdsCshapu
                     if (Threadrest == true) { goto Restart; }
 
 
-                    foreach (Dictionary<UInt64, FrnFilePath> l in fileList)
+                    for(int d= 0;d < fileList.Count;d++)
                     {
 
-                        if (!(l.Values.Count > 0 && Directory.Exists(l.Values.First().VolumeName.ToString() + ":\\"))) continue;
+                        Dictionary<UInt64, FrnFilePath> l = fileList[d];
+                        //并行过慢,PARALLEL.foreach,改单线程运行`
 
-                        if (driverNames != null)
+
+                        if (!(l.Values.Count > 0 && Directory.Exists(volumes.ToList()[d].Name))) continue;
+
+                        if (driverNames != null) 
                         {
                             bool driverFound = false;
                             foreach (string driverName in driverNames)
                             {
-                                if (driverName.ToUpper() == l.Values.First().VolumeName.ToString().ToUpper())
+                                if (driverName.ToUpper() == volumes.ToList()[d].Name.TrimEnd('\\').Trim(':').ToUpper())
                                 {
                                     driverFound = true;
                                     break;
@@ -649,10 +647,6 @@ namespace tdsCshapu
                                 continue;
                             }
                         }
-
-
-                        //并行过慢,PARALLEL.foreach,改单线程运行
-
 
                         foreach (FrnFilePath f in l.Values)
                         {
@@ -702,7 +696,9 @@ namespace tdsCshapu
                             {
 
                                 findnum++;
+
                                 vvlist.Add(f);
+
                                 if (findmax != 0 && findnum > findmax && isAll == false) break;
 
                                 if (findnum == 100)
@@ -714,7 +710,6 @@ namespace tdsCshapu
                                         {
                                             istView1.BeginInvoke(new System.EventHandler(listupdate_Cache), vvlist.Count);  //异步BeginInvoke
                                             vlist = vvlist;
-                                            // this.BeginInvoke(new dosize(Sizecalc), vvlist.Count);
                                         }
                                         catch { }
 
@@ -723,8 +718,6 @@ namespace tdsCshapu
                                     {
                                         try
                                         {
-                                            // this.BeginInvoke(new dosize(Sizecalc), vvlist.Count);
-
                                             vlist = vvlist;
                                             istView1.BeginInvoke(new System.EventHandler(listupdate_Cache), vvlist.Count);  //异步BeginInvoke
                                         }
@@ -733,11 +726,9 @@ namespace tdsCshapu
 
                                     refcache = true;
                                 }
-
-
                             }
                         }
-                    }
+                    }//foreach
 
                 }catch(Exception ex)
                 {
@@ -751,9 +742,8 @@ namespace tdsCshapu
                     if (vvlist.Count < vlist.Count)
                     {
 
-                        //this.BeginInvoke(new dosize(Sizecalc), vvlist.Count);
-                        vlist = vvlist;
                         istView1.BeginInvoke(new System.EventHandler(listupdate), vvlist.Count);  //必须异步BeginInvoke，不然不同步
+                        vlist = vvlist;
 
 
                     }
@@ -762,24 +752,16 @@ namespace tdsCshapu
 
                         vlist = vvlist;
                         istView1.BeginInvoke(new System.EventHandler(listupdate), vvlist.Count);  //必须异步BeginInvoke，不然不同步
-                        //this.BeginInvoke(new dosize(Sizecalc), vvlist.Count);
-
                     }
 
                 }
                 else
                 {
-
                     istView1.BeginInvoke(new System.EventHandler(listupdate), 0);  //异步BeginInvoke
-                    //this.BeginInvoke(new dosize(Sizecalc), 0);
-
                 }
-
 
                 refcache = true;
                 vvlist = null;
-                // gOs.Reset();
-
             }
         }
 
@@ -863,9 +845,12 @@ namespace tdsCshapu
 
                 }
 
-                ShowStatuesInfo("共" + size.ToString() + "条记录");
-
+              
                 istView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+
+                ShowStatuesInfo("共" + size.ToString() + "条记录");
+              
+
 
             }
         }
@@ -915,32 +900,24 @@ namespace tdsCshapu
                     value = f.Reason & Win32Api.USN_REASON_FILE_CREATE;
                     if (0 != value && fileList.Count > index)
                     {
-                        if (!(fileList[index].ContainsKey(f.FileReferenceNumber)))
-                        {
-
+                        if (!fileList[index].ContainsKey(f.FileReferenceNumber) && !string.IsNullOrWhiteSpace(f.Name))
+                        {                            
                             string nacn = SpellCN.GetSpellCode(f.Name.ToUpper());
-
-
                             fileList[index].Add(f.FileReferenceNumber, new FrnFilePath(f.FileReferenceNumber, f.ParentFileReferenceNumber, f.Name + "|" + nacn, null));
                             fileList[index][f.FileReferenceNumber].SetVolandVolName(index, volumes.ElementAt(index).Name.TrimEnd('\\'));
                             fileList[index][f.FileReferenceNumber].keyindex = TBS(nacn);
-
                         }
                     }
+
                     value = f.Reason & Win32Api.USN_REASON_FILE_DELETE;
                     if (0 != value && fileList.Count > index)
                     {
                         if (fileList[index].ContainsKey(f.FileReferenceNumber))
                         {
                             fileList[index].Remove(f.FileReferenceNumber);
-
                         }
                     }
-
-
                     _usnCurrentJournalState[index] = newUsnState;   //更新状态
-
-
                 }
             }
         }
@@ -1157,9 +1134,7 @@ namespace tdsCshapu
                                     string path = string.Empty;
                                     try
                                     {
-
                                         path = Path.GetDirectoryName(string.Format("{0}:{1}\\{2}", f.VolumeName, GetPath(f), getfile(f.fileName)));
-
                                         
                                         Process.Start("explorer.exe", path);
                                         UpdateRecord(f);//记录相关* // 
@@ -1510,8 +1485,10 @@ namespace tdsCshapu
             try
             {
                 Threadrunning = false;
-                if (GoSearch != null) GoSearch.Abort();
-
+                if (GoSearch != null)
+                {
+                    GoSearch.Abort();
+                }
             }
             catch { }
             try
@@ -1704,19 +1681,7 @@ namespace tdsCshapu
                 case Keys.Enter:
                     {
                         string tmp = Keywords.Text.Trim();
-
-                            //已失效
-                            //string[] cmd = tmp.Split(' ');
-                            //try
-                            //{
-
-                            //    System.Diagnostics.Process.Start(cmd[0], tmp.Substring(tmp.IndexOf(' '), tmp.Length - tmp.IndexOf(' ')));
-                            //    return;
-                            //}
-                            //catch
-                            //{
-
-                            //}                       
+                                                                 
 
                             try
                             {
@@ -2096,7 +2061,7 @@ namespace tdsCshapu
         {
             string ver = "5.0924.10381";
             ifhide = false;
-            MessageBox.Show("版本号:" + ver + "\r\nWWW.LEAHYGO.COM");
+            MessageBox.Show("版本号:" + ver + "\r\nLJ@Nanjing@20211210");
         }
         private void 打开OToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -2480,17 +2445,30 @@ namespace tdsCshapu
             About();
         }
 
-
+        string GetDateFromPath(string path2)
+        {
+            if (File.Exists(path2))
+            {
+                return File.GetLastWriteTime(path2).ToString();
+            }
+            
+            if (Directory.Exists(path2))
+            {
+                return Directory.GetCreationTime(path2).ToString();
+            }            
+            
+             return "null";
+            
+        }
 
         public bool refcache = false;
         private void IstView1_CacheVirtualItems(object sender, CacheVirtualItemsEventArgs e)
         {
-
+          
             if ((CurrentCacheItemsSource != null && e.StartIndex >= firstitem && e.EndIndex <= firstitem + CurrentCacheItemsSource.Length))
             {
                 if (refcache == false) { return; }
             }
-
 
             firstitem = e.StartIndex;
             int length = e.EndIndex - e.StartIndex + 1;
@@ -2507,6 +2485,7 @@ namespace tdsCshapu
                     string name = getfile(f.fileName);
                     string path = f.VolumeName + ":" + GetPath(f);
                     string path2 = path + "\\" + name;
+                  
 
                     if (f.IcoIndex.HasValue)
                     {
@@ -2558,7 +2537,7 @@ namespace tdsCshapu
                                     f.IcoIndex = ext;
                                 }
                                 catch { }
-                                CurrentCacheItemsSource[i] = new ListViewItem(new string[] { name, path2 }, ext); ;
+                                CurrentCacheItemsSource[i] = new ListViewItem(new string[] { name,  path2}, ext); ;
                                 continue;
                             }
 
@@ -2573,11 +2552,12 @@ namespace tdsCshapu
 
                     }
                 }
+              
+
             }
 
             refcache = false;
             istView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
-
         }
 
         private void IstView1_SelectedIndexChanged(object sender, EventArgs e)

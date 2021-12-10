@@ -342,10 +342,16 @@ namespace UsnJournal
         ///Getall
         public Dictionary<UInt64, FrnFilePath> GetNtfsVolumeAllentries(int vol, string volname, out UsnJournalReturnCode usnRtnCode)
         {
-            Dictionary<UInt64, FrnFilePath> folders = new Dictionary<UInt64, FrnFilePath>();
+            Dictionary<UInt64, FrnFilePath> foldersAndFiles = new Dictionary<UInt64, FrnFilePath>();
             FrnFilePath f;
 
-            folders.Add(ROOT_FILE_REFERENCE_NUMBER, new FrnFilePath(ROOT_FILE_REFERENCE_NUMBER, null, string.Empty, null));
+            foldersAndFiles.Add(ROOT_FILE_REFERENCE_NUMBER, new FrnFilePath(ROOT_FILE_REFERENCE_NUMBER, null, "", null)
+            {
+                Volume = (short)vol,
+                VolumeName = volname.ToArray()[0]
+            });
+         
+
             usnRtnCode = UsnJournalReturnCode.VOLUME_NOT_NTFS;
             if (bNtfsVolume)
             {
@@ -398,22 +404,12 @@ namespace UsnJournal
 
                                 // check for directory entries
                                 //
-                                if (usnEntry.IsFolder)
+                                if (string.IsNullOrWhiteSpace(usnEntry.Name))
                                 {
-                                    
-                                    f = new FrnFilePath(usnEntry.FileReferenceNumber, usnEntry.ParentFileReferenceNumber, usnEntry.Name, null)
-                                    {
-                                        Volume = (short)vol,
-                                        VolumeName = volname.ToArray()[0]
-                                    };
-                                    //ToUpper()貌似没用，后期可去掉
-                                    string nacn = SpellCN.GetSpellCode(f.fileName.ToUpper());
-                                    f.keyindex = tdsCshapu.Form1.TBS(nacn);
-                                    f.fileName =  f.fileName+"|"+ nacn;
-                                    if (!(string.IsNullOrEmpty(f.fileName))) { folders.Add(f.fileReferenceNumber, f); }
-                                                                    }
-                                if (usnEntry.IsFile)
-                                {
+                                    continue;
+                                }
+
+                              
                                     f = new FrnFilePath(usnEntry.FileReferenceNumber, usnEntry.ParentFileReferenceNumber, usnEntry.Name, null)
                                     {
                                         Volume = (short)vol,
@@ -423,10 +419,8 @@ namespace UsnJournal
                                     f.keyindex = tdsCshapu.Form1.TBS(nacn);
                                     f.fileName = f.fileName + "|" + nacn;
                                     //ddd
-                                    if (!(string.IsNullOrEmpty(f.fileName))) { folders.Add(f.fileReferenceNumber, f); }
-
-
-                                }
+                                    foldersAndFiles.Add(f.fileReferenceNumber, f);
+                               
 
 
 
@@ -451,7 +445,7 @@ namespace UsnJournal
                 }
             }
             // _elapsedTime = DateTime.Now - startTime;
-            return folders;
+            return foldersAndFiles;
         }
 
 
@@ -503,7 +497,7 @@ namespace UsnJournal
                         Win32Api.IO_STATUS_BLOCK ioStatusBlock = new Win32Api.IO_STATUS_BLOCK();
                         IntPtr hFile = IntPtr.Zero;
 
-                        IntPtr buffer = Marshal.AllocHGlobal(4096);
+                        IntPtr buffer = Marshal.AllocHGlobal(8192);
                         IntPtr refPtr = Marshal.AllocHGlobal(8);
                         IntPtr objAttIntPtr = Marshal.AllocHGlobal(Marshal.SizeOf(objAttributes));
 
@@ -736,14 +730,14 @@ namespace UsnJournal
                         while (bReadMore)
                         {
                             bool bRtn = Win32Api.DeviceIoControl(
-_usnJournalRootHandle,
-Win32Api.FSCTL_READ_USN_JOURNAL,
-rujdBuffer,
-sizeRujd,
-pbData,
-pbDataSize,
-out uint outBytesReturned,
-IntPtr.Zero);
+                                    _usnJournalRootHandle,
+                                    Win32Api.FSCTL_READ_USN_JOURNAL,
+                                    rujdBuffer,
+                                    sizeRujd,
+                                    pbData,
+                                    pbDataSize,
+                                    out uint outBytesReturned,
+                                    IntPtr.Zero);
                             if (bRtn)
                             {
                                 IntPtr pUsnRecord = new IntPtr(pbData.ToInt64() + sizeof(UInt64));

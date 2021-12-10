@@ -91,17 +91,24 @@ namespace SystemMenu
         protected override void WndProc(ref Message m)
         {
             #region IContextMenu
-
-            if (_oContextMenu != null &&
-                m.Msg == (int)WM.MENUSELECT &&
-                ((int)ShellHelper.HiWord(m.WParam) & (int)MFT.SEPARATOR) == 0 &&
-                ((int)ShellHelper.HiWord(m.WParam) & (int)MFT.POPUP) == 0)
+            try
             {
-                if (ShellHelper.LoWord(m.WParam) == (int)CMD_CUSTOM.ExpandCollapse)
-                    _ = "Expands or collapses the current selected item";
-                else
+
+                if (_oContextMenu != null &&
+                    m.Msg == (int)WM.MENUSELECT &&
+                    ((int)ShellHelper.HiWord(m.WParam) & (int)MFT.SEPARATOR) == 0 &&
+                    ((int)ShellHelper.HiWord(m.WParam) & (int)MFT.POPUP) == 0)
                 {
+                    if (ShellHelper.LoWord(m.WParam) == (int)CMD_CUSTOM.ExpandCollapse)
+                        _ = "Expands or collapses the current selected item";
+                    else
+                    {
+                    }
                 }
+            }
+            catch
+            {
+
             }
 
             #endregion
@@ -1502,11 +1509,11 @@ namespace SystemMenu
         /// <param name="ptr">The pointer to the WParam</param>
         /// <returns>The unsigned integer for the High Word</returns>
         public static uint HiWord(IntPtr ptr)
-        {
+        {                      
             if (((uint)ptr & 0x80000000) == 0x80000000)
                 return ((uint)ptr >> 16);
             else
-                return ((uint)ptr >> 16) & 0xffff;
+                return ((uint)ptr >> 16) & 0xffff;                      
         }
 
         /// <summary>
