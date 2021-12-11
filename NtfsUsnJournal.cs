@@ -340,14 +340,13 @@ namespace UsnJournal
 
 
         ///Getall
-        public Dictionary<UInt64, FrnFilePath> GetNtfsVolumeAllentries(int vol, string volname, out UsnJournalReturnCode usnRtnCode)
+        public Dictionary<UInt64, FrnFileOrigin> GetNtfsVolumeAllentries(int vol, string volname, out UsnJournalReturnCode usnRtnCode)
         {
-            Dictionary<UInt64, FrnFilePath> foldersAndFiles = new Dictionary<UInt64, FrnFilePath>();
-            FrnFilePath f;
+            Dictionary<UInt64, FrnFileOrigin> foldersAndFiles = new Dictionary<UInt64, FrnFileOrigin>();
+            FrnFileOrigin f;
 
-            foldersAndFiles.Add(ROOT_FILE_REFERENCE_NUMBER, new FrnFilePath(ROOT_FILE_REFERENCE_NUMBER, null, "", null)
+            foldersAndFiles.Add(ROOT_FILE_REFERENCE_NUMBER, new FrnFileFull(ROOT_FILE_REFERENCE_NUMBER, null, "")
             {
-                Volume = (short)vol,
                 VolumeName = volname.ToArray()[0]
             });
          
@@ -409,9 +408,8 @@ namespace UsnJournal
                                     continue;
                                 }
                                                            
-                                f = new FrnFilePath(usnEntry.FileReferenceNumber, usnEntry.ParentFileReferenceNumber, usnEntry.Name, null)
+                                f = new FrnFileFull(usnEntry.FileReferenceNumber, usnEntry.ParentFileReferenceNumber, usnEntry.Name)
                                     {
-                                        Volume = (short)vol,
                                         VolumeName = volname.ToArray()[0]
                                     };
                                     string nacn = SpellCN.GetSpellCode(f.fileName.ToUpper());
