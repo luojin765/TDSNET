@@ -8,7 +8,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-
+using System.Windows.Forms;
 
 namespace UsnJournal
 {
@@ -408,9 +408,8 @@ namespace UsnJournal
                                 {
                                     continue;
                                 }
-
-                              
-                                    f = new FrnFilePath(usnEntry.FileReferenceNumber, usnEntry.ParentFileReferenceNumber, usnEntry.Name, null)
+                                                           
+                                f = new FrnFilePath(usnEntry.FileReferenceNumber, usnEntry.ParentFileReferenceNumber, usnEntry.Name, null)
                                     {
                                         Volume = (short)vol,
                                         VolumeName = volname.ToArray()[0]
@@ -419,9 +418,7 @@ namespace UsnJournal
                                     f.keyindex = tdsCshapu.Form1.TBS(nacn);
                                     f.fileName = f.fileName + "|" + nacn;
                                     //ddd
-                                    foldersAndFiles.Add(f.fileReferenceNumber, f);
-                               
-
+                                    foldersAndFiles.Add(f.fileReferenceNumber, f);                             
 
 
                                 pUsnRecord = new IntPtr(pUsnRecord.ToInt64() + usnEntry.RecordLength);

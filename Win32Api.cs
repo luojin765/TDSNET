@@ -608,6 +608,7 @@ namespace PInvoke
                 short fileNameLength = Marshal.ReadInt16(ptrToUsnRecord, FNL_OFFSET);
                 short fileNameOffset = Marshal.ReadInt16(ptrToUsnRecord, FN_OFFSET);
                 _name = Marshal.PtrToStringUni(new IntPtr(ptrToUsnRecord.ToInt64() + fileNameOffset), fileNameLength / sizeof(char));
+
             }
 
 

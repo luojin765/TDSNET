@@ -58,6 +58,7 @@ namespace tdsCshapu
             this.关于LToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.退出QToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
+            this.columnHeader3 = new System.Windows.Forms.ColumnHeader();
             columnHeader1 = new System.Windows.Forms.ColumnHeader();
             columnHeader2 = new System.Windows.Forms.ColumnHeader();
             this.RightMenu.SuspendLayout();
@@ -84,7 +85,8 @@ namespace tdsCshapu
             this.istView1.CausesValidation = false;
             this.istView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             columnHeader1,
-            columnHeader2});
+            columnHeader2,
+            this.columnHeader3});
             this.istView1.ContextMenuStrip = this.RightMenu;
             this.istView1.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.istView1.ForeColor = System.Drawing.Color.DimGray;
@@ -100,6 +102,7 @@ namespace tdsCshapu
             this.istView1.VirtualMode = true;
             this.istView1.CacheVirtualItems += new System.Windows.Forms.CacheVirtualItemsEventHandler(this.IstView1_CacheVirtualItems);
             this.istView1.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(this.ListView1_RetrieveVirtualItem);
+            this.istView1.SelectedIndexChanged += new System.EventHandler(this.istView1_SelectedIndexChanged_1);
             this.istView1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ListView1_KeyDown);
             this.istView1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ListView1_MouseClick);
             this.istView1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.ListView1_MouseDoubleClick);
@@ -303,6 +306,10 @@ namespace tdsCshapu
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.label1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Label1_MouseDown);
             // 
+            // columnHeader3
+            // 
+            this.columnHeader3.Text = "Time";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
@@ -363,6 +370,7 @@ namespace tdsCshapu
         private System.Windows.Forms.ToolStripTextBox toolStripTextBox1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ColumnHeader columnHeader3;
     }
 }
 

@@ -23,19 +23,14 @@ namespace QueryEngine
         public short Volume;  //根目录判断
         public short weight;
         public UInt64 fileReferenceNumber;
+        public FrnFilePath parentFrn=null;
         public UInt64? parentFileReferenceNumber;
         public UInt64 keyindex;
-        public Int16 QuanZhong=0;  //加入权重用于排序
         public string fileName = "";
-        //  public string uniformName = "";
-        //   public  string CuniformName="";
-        public UInt64 DATA;
-        //   public bool isFolder;   //目录判断
         public string path;  //根目录路径
         public int? IcoIndex;
         //  public string exten;  //扩展名
-
-
+        public Int64 timestamp=long.MinValue;        
 
         public void SetVolandVolName(int vol, string volname)
         {

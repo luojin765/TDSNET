@@ -1,5 +1,7 @@
 ﻿using QueryEngine;
 using System;
+using System.Text;
+
 namespace DoActions
 {
     class MyFunctions
@@ -10,6 +12,22 @@ namespace DoActions
         {
             
             return  parentNode.path+"\\"+ tdsCshapu.Form1.getfile(currentNode.fileName);
+        }
+
+        public static string GetPathStr(FrnFilePath f)
+        {
+            string sb="";
+            if (f.parentFrn != null)
+            {
+                sb= GetPathStr(f.parentFrn)+"\\"+ tdsCshapu.Form1.getfile(f.fileName);
+            }
+            else
+            {
+                sb = f.VolumeName + ":";
+            }
+             
+            return sb;
+
         }
 
         /// <summary>
