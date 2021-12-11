@@ -306,7 +306,9 @@ namespace tdsCshapu
 
 
                     }
-                    fileList[i].OrderByDescending(v => v.Value.timestamp).ToDictionary(f => f.Key, f => f.Value);
+
+                    fileList[i] = fileList[i].OrderByDescending(o => o.Value.timestamp).ToDictionary(p => p.Key, o => o.Value);
+
                 }
 
             }
@@ -749,7 +751,7 @@ namespace tdsCshapu
                                         try
                                         {
                                             istView1.BeginInvoke(new System.EventHandler(listupdate_Cache), vvlist.Count);  //异步BeginInvoke
-                                            vlist = vvlist.OrderByDescending(o=>o.timestamp).ToList();
+                                            vlist = vvlist.OrderByDescending(o => o.timestamp).ToList(); ;
                                         }
                                         catch { }
 
@@ -758,7 +760,7 @@ namespace tdsCshapu
                                     {
                                         try
                                         {
-                                            vlist = vvlist.OrderByDescending(o => o.timestamp).ToList();
+                                            vlist = vvlist.OrderByDescending(o => o.timestamp).ToList(); ;
 
                                             istView1.BeginInvoke(new System.EventHandler(listupdate_Cache), vvlist.Count);  //异步BeginInvoke
                                         }
