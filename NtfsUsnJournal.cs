@@ -412,9 +412,7 @@ namespace UsnJournal
                                     {
                                         VolumeName = volname.ToArray()[0]
                                     };
-                                    string nacn = SpellCN.GetSpellCode(f.fileName.ToUpper());
-                                    f.keyindex = tdsCshapu.Form1.TBS(nacn);
-                                    f.fileName = f.fileName + "|" + nacn;
+                                    
                                     //ddd
                                     foldersAndFiles.Add(f.fileReferenceNumber, f);                             
 

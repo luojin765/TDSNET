@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Text;
 
 namespace CNChar
 {
     class SpellCN
     {
-        static StringBuilder strTemp = new StringBuilder(256);
         public static string GetSpellCode(string CnStr)
         {
+            StringBuilder strTemp = new StringBuilder(256);
 
-            
             strTemp.Clear();
             int iLen = CnStr.Length;
 
@@ -21,11 +21,14 @@ namespace CNChar
 
                 if (!SpellDict.ContainsKey(c))
                 {
-                    SpellDict.Add(c, GetCharSpellCode(c));                    
+                    SpellDict.TryAdd(c, GetCharSpellCode(c));
                 }
-                strTemp.Append(SpellDict[c]);
-            }
 
+                if(SpellDict.TryGetValue(c,out string value))
+                    {
+               strTemp.Append(value);
+                }               
+            }
             return strTemp.ToString();
 
         }
@@ -35,13 +38,12 @@ namespace CNChar
         /// </summary>
         /// <param name="CnChar">单个汉字</param>
         /// <returns>单个大写字母</returns>
-        static Dictionary<string, string> SpellDict = new Dictionary<string, string>();
+        static ConcurrentDictionary<string, string> SpellDict = new ConcurrentDictionary<string, string>();
 
         private static string GetCharSpellCode(string CnChar)
         {
             
             long iCnChar;
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             Encoding gb2312 = Encoding.GetEncoding("gb2312");
             byte[] ZW = gb2312.GetBytes(CnChar);
 

@@ -105,6 +105,7 @@ namespace tdsCshapu
             InitializeComponent();
             IFileHelper.ListViewSysImages(istView1);
             SetDoubleBuffering(istView1, true);
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 
         }
@@ -282,8 +283,11 @@ namespace tdsCshapu
                     DateTime t = DateTime.Now;
                     //foreach(FrnFilePath f in fileList[i].Values)
                     Parallel.ForEach(fileList[i].Values, f =>
-                    {
+                    {                       
                         UpdateTime(f);
+                        string nacn =  SpellCN.GetSpellCode(f.fileName.ToUpper());
+                        f.keyindex = tdsCshapu.Form1.TBS(nacn);
+                        f.fileName = f.fileName + "|" + nacn;
                     });
 
                         foreach (FrnFileOrigin f in fileList[i].Values)
@@ -760,7 +764,7 @@ namespace tdsCshapu
                                     {
                                         try
                                         {
-                                            vlist = vvlist.OrderByDescending(o => o.timestamp).ToList(); ;
+                                            vlist = vvlist.OrderByDescending(o => o.timestamp).ToList(); 
 
                                             istView1.BeginInvoke(new System.EventHandler(listupdate_Cache), vvlist.Count);  //异步BeginInvoke
                                         }
@@ -809,7 +813,7 @@ namespace tdsCshapu
         static void Log_write(string log)
         {
             string path = Application.StartupPath + "\\" + "Sys.log";
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+           // System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
             using (System.IO.StreamWriter fs = new System.IO.StreamWriter(path, true, System.Text.Encoding.GetEncoding("gb2312")))
             {
 
@@ -1902,7 +1906,7 @@ namespace tdsCshapu
         private void buffercoolies()
         {
             string path = Application.StartupPath + "\\" + "Record.cah";
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             using (StreamWriter fs = new StreamWriter(path, false, System.Text.Encoding.GetEncoding("gb2312")))
             {
                 foreach (FrnFileOrigin f in Record)
@@ -1926,7 +1930,7 @@ namespace tdsCshapu
                 //try
                 {
 
-                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                   // Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                     using (StreamReader fs = new StreamReader(path, System.Text.Encoding.GetEncoding("gb2312")))
                     {
                         Record.Clear();
@@ -2725,7 +2729,7 @@ namespace tdsCshapu
             try
             {
                 string path = Application.StartupPath + "\\" + "Settings.ini";
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                 using (StreamWriter fs = new StreamWriter(path, false, System.Text.Encoding.GetEncoding("gb2312")))
                 {
 
@@ -2756,7 +2760,7 @@ namespace tdsCshapu
             {
                 try
                 {
-                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                   // Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                     using (StreamReader fs = new StreamReader(path, System.Text.Encoding.GetEncoding("gb2312")))
                     {
 
