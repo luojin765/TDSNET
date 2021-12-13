@@ -347,7 +347,7 @@ namespace UsnJournal
 
             foldersAndFiles.Add(ROOT_FILE_REFERENCE_NUMBER, new FrnFileFull(ROOT_FILE_REFERENCE_NUMBER, null, "")
             {
-                VolumeName = volname.ToArray()[0]
+                VolumeName = volname[0]
             });
          
 
@@ -410,9 +410,8 @@ namespace UsnJournal
                                                            
                                 f = new FrnFileFull(usnEntry.FileReferenceNumber, usnEntry.ParentFileReferenceNumber, usnEntry.Name)
                                     {
-                                        VolumeName = volname.ToArray()[0]
-                                    };
-                                    
+                                        VolumeName = volname[0]
+                                    };                                    
                                     //ddd
                                     foldersAndFiles.Add(f.fileReferenceNumber, f);                             
 

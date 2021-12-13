@@ -34,9 +34,9 @@ namespace tdsCshapu
         public static Color SHALLOW = Color.FromArgb(211, 82, 48);
         public static Color HIGHLIGHT = Color.FromArgb(233, 233, 233);
 
-        const char Yii = '1';
-        const char Ling = '0';
-        const int Zongshu = 45; //筛选字符的个数
+        const char POSITIVE = '1';
+        const char NEGATIVE = '0';
+        const int SCREENCHARNUM = 45; //筛选字符的个数
         public static List<Dictionary<UInt64, FrnFileOrigin>> fileList = new List<Dictionary<UInt64, FrnFileOrigin>>();   //file结果,list数组，元素是字典型数据库
         List<FrnFileOrigin> vlist = new List<FrnFileOrigin>() { };      //listview 绑定
         List<FrnFileOrigin> Record = new List<FrnFileOrigin>() { }; //记录相关
@@ -284,15 +284,14 @@ namespace tdsCshapu
                     //foreach(FrnFilePath f in fileList[i].Values)
                     Parallel.ForEach(fileList[i].Values, f =>
                     {                       
-                        UpdateTime(f);
                         string nacn =  SpellCN.GetSpellCode(f.fileName.ToUpper());
                         f.keyindex = tdsCshapu.Form1.TBS(nacn);
                         f.fileName = f.fileName + "|" + nacn;
+                        UpdateTime(f);
                     });
 
                         foreach (FrnFileOrigin f in fileList[i].Values)
                     {
-
                         if (f != null)
                         {
                             string[] ext = f.fileName.Split('.');
@@ -469,12 +468,10 @@ namespace tdsCshapu
                         e.Item = GenerateListViewItem(f,name, path2);
                     }
                 }
-
-
             }
             if (e.Item == null)
             {
-                e.Item = new ListViewItem(new string[] { "", "" });
+                e.Item = new ListViewItem(new string[] { "", "","" });
             }
         }
 
@@ -959,7 +956,7 @@ namespace tdsCshapu
                         {                            
                             string nacn = SpellCN.GetSpellCode(f.Name.ToUpper());
                             fileList[index].Add(f.FileReferenceNumber, new FrnFileOrigin(f.FileReferenceNumber,f.Name + "|" + nacn));
-                            fileList[index][f.FileReferenceNumber].SetVolandVolName(volumes.ElementAt(index).Name.TrimEnd('\\'));
+                            fileList[index][f.FileReferenceNumber].VolumeName=(volumes.ElementAt(index).Name)[0];
                             fileList[index][f.FileReferenceNumber].keyindex = TBS(nacn);
                             fileList[index][f.FileReferenceNumber].parentFrn = fileList[index][f.ParentFileReferenceNumber];
                             UpdateTime(fileList[index][f.FileReferenceNumber]);
@@ -995,11 +992,11 @@ namespace tdsCshapu
 
         public static UInt64 TBS(string txt)
         {
-            char[] alph = new char[Zongshu];
+            char[] alph = new char[SCREENCHARNUM];
 
-            for (int i = 0; i < Zongshu; i++)
+            for (int i = 0; i < SCREENCHARNUM; i++)
             {
-                if (txt.Contains(alphbet[i])) { alph[i] = Yii; } else { alph[i] = Ling; }
+                if (txt.Contains(alphbet[i])) { alph[i] = POSITIVE; } else { alph[i] = NEGATIVE; }
             }
             return Convert.ToUInt64(new string(alph), 2);
         }
@@ -2518,7 +2515,6 @@ namespace tdsCshapu
 
             firstitem = e.StartIndex;
             int length = e.EndIndex - e.StartIndex + 1;
-            CurrentCacheItemsSource = null;
             CurrentCacheItemsSource = new ListViewItem[length];
 
             for (int i = 0; i < length; i++)

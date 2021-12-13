@@ -5,7 +5,7 @@ using System.Linq;
 namespace QueryEngine
 {
     
-    public class FrnFileOrigin
+    public class FrnFileOrigin//  : IComparable<FrnFileOrigin>
     {
         public char VolumeName; //根目录名称
         public UInt64 fileReferenceNumber;
@@ -16,12 +16,18 @@ namespace QueryEngine
         public int? IcoIndex;
         public Int64 timestamp = long.MinValue;
 
-
-        public void SetVolandVolName(string volname)
-        {
-            //this.Volume = (short)vol;
-            this.VolumeName = volname.ToArray()[0];
-        }
+              
+        //int IComparable<FrnFileOrigin>.CompareTo(FrnFileOrigin other)
+        //{
+        //    if (this.timestamp > other.timestamp)
+        //    {
+        //        return 1;
+        //    }
+        //    else
+        //    {
+        //        return -1;
+        //    }
+        //}
 
         public short weight;
         public FrnFileOrigin(UInt64 fileReferenceNumber, string fileName)
@@ -32,7 +38,7 @@ namespace QueryEngine
 
    }
 
-    public class FrnFileFull: FrnFileOrigin
+    public sealed class FrnFileFull: FrnFileOrigin
     {
         internal  UInt64? parentFileReferenceNumber = null;
         
