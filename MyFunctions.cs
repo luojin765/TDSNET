@@ -15,7 +15,7 @@ namespace DoActions
             string sb="";
             if (f.parentFrn != null)
             {
-                sb= GetPathStr(f.parentFrn)+"\\"+ tdsCshapu.Form1.getfile(f.fileName);
+                sb= GetPathStr(f.parentFrn)+"\\"+ tdsCshapu.Form1.getfile(f.FileName);
             }
             else
             {
