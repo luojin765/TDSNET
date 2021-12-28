@@ -382,7 +382,6 @@ namespace UsnJournal
                         // Gather up volume's directories
                         //
 
-
                         while (false != Win32Api.DeviceIoControl(
                             _usnJournalRootHandle,
                             Win32Api.FSCTL_ENUM_USN_DATA,
