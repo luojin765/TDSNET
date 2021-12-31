@@ -533,15 +533,12 @@ namespace tdsCshapu
                     string name = getfile(f.FileName);
                     string path2 = GetPath(f);                    
 
-                    if (f.IcoIndex.HasValue)
-                    {
-                        e.Item = GenerateListViewItem(f, name, path2);
-                    }
-                    else
-                    {
+                    if (!f.IcoIndex.HasValue)
+                    { 
                         f.IcoIndex = IFileHelper.FileIconIndex(@path2);
-                        e.Item = GenerateListViewItem(f,name, path2);
                     }
+                    e.Item = GenerateListViewItem(f, name, path2);
+
                 }
             }
             if (e.Item == null)
@@ -1057,7 +1054,38 @@ namespace tdsCshapu
         }
 
 
+        [DllImport("shell32.dll", ExactSpelling = true)]
+        private static extern void ILFree(IntPtr pidlList);
 
+        [DllImport("shell32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
+        private static extern IntPtr ILCreateFromPathW(string pszPath);
+
+        [DllImport("shell32.dll", ExactSpelling = true)]
+        private static extern int SHOpenFolderAndSelectItems(IntPtr pidlList, uint cild, IntPtr children, uint dwFlags);
+
+        public static void ExplorerFile(string filePath)
+        {
+            if (!File.Exists(filePath) && !Directory.Exists(filePath))
+                return;
+
+            if (Directory.Exists(filePath))
+                Process.Start(@"explorer.exe", "/select,\"" + filePath + "\"");
+            else
+            {
+                IntPtr pidlList = ILCreateFromPathW(filePath);
+                if (pidlList != IntPtr.Zero)
+                {
+                    try
+                    {
+                        Marshal.ThrowExceptionForHR(SHOpenFolderAndSelectItems(pidlList, 0, IntPtr.Zero, 0));
+                    }
+                    finally
+                    {
+                        ILFree(pidlList);
+                    }
+                }
+            }
+        }
 
 
 
@@ -1188,8 +1216,10 @@ namespace tdsCshapu
                                     try
                                     {
                                         path = Path.GetDirectoryName(GetPath(f));
-                                        
-                                        Process.Start("explorer.exe", path);
+
+                                        ExplorerFile(GetPath(f));
+
+                                        //Process.Start("explorer.exe", path);
                                         UpdateRecord(f);//记录相关* // 
 
                                     }

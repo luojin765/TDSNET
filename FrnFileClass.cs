@@ -17,8 +17,6 @@ namespace QueryEngine
         public bool orderFirst=false;
         
         public short weight;
-        public static int num;
-        public static int negnum;
 
         public string FileName 
         { get => fileName; 
