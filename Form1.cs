@@ -1963,7 +1963,7 @@ namespace tdsCshapu
                             {
                                 string[] KeyValue = fs.ReadLine().Split('@');
 
-                                if (KeyValue != null && KeyValue.GetUpperBound(0) == 5)
+                                if (KeyValue != null && KeyValue.GetUpperBound(0) == 4)
                                 {
 
                                     if ((fileSysList[int.Parse(KeyValue[3])].files.TryGetValue(UInt64.Parse(KeyValue[0]), out FrnFileOrigin f)))
