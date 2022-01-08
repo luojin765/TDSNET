@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using SystemMenu;
+using TDS.Controller;
 using UsnJournal;
 
 
@@ -68,6 +69,11 @@ namespace tdsCshapu
         bool CUSTOMHIDE = true;
 
         List<FileSys> fileSysList = new List<FileSys>();
+
+
+        static FSTController fstController;
+
+
         private class FileSys
         {
            public DriveInfo driveInfo;
