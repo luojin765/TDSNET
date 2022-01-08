@@ -16,8 +16,6 @@ namespace QueryEngine
         public int? IcoIndex;
         public bool orderFirst=false;
         
-        public short weight;
-
         public string FileName 
         { get => fileName; 
             

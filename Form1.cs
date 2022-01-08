@@ -18,7 +18,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using SystemMenu;
-using TDS.Controller;
 using UsnJournal;
 
 
@@ -69,9 +68,6 @@ namespace tdsCshapu
         bool CUSTOMHIDE = true;
 
         List<FileSys> fileSysList = new List<FileSys>();
-
-
-        static FSTController fstController;
 
 
         private class FileSys
@@ -1450,6 +1446,20 @@ namespace tdsCshapu
                 ifhide = false;
 
                 this.Visible = false;
+
+                try
+                {
+                    if (GoSearch != null && GoSearch.IsAlive)
+                    {
+                        Threadrunning = false;
+                        gOs.Set();
+                        GoSearch = null;
+                    }; //启动搜索线程                
+                }
+                catch
+                {
+
+                }
             }
             else
             {
@@ -1457,6 +1467,38 @@ namespace tdsCshapu
 
 
                 this.Visible = true;
+
+
+                try
+                {
+                    //重启线程
+                    try
+                    {
+                        if (GoSearch != null && GoSearch.IsAlive)
+                        {
+                            Threadrunning = false;
+                            gOs.Set();
+                            GoSearch = null;
+                        }; //启动搜索线程                
+                    }
+                    catch
+                    {
+
+                    }
+
+
+                    GoSearch = new Thread(SearchFilesThreadStart)
+                {
+                    IsBackground = true,
+                    Priority = System.Threading.ThreadPriority.Highest
+                }; //启动搜索线程
+                GoSearch.Start();
+                }
+                catch
+                {
+
+                }
+                
 
                 //int q;   //激活内存开销
                 //foreach (Dictionary<UInt64, FrnFilePath> l in fileList)
@@ -1805,10 +1847,7 @@ namespace tdsCshapu
 
             if (Record.Count > 0)
             {
-
-                if (Record.Count > 1) { Record.Sort(new CComparer()); }
-
-                while (Record.Count > 50)
+                while (Record.Count > 100)
                 {
                     Record.RemoveAt(Record.Count - 1);
                 }
@@ -1840,19 +1879,7 @@ namespace tdsCshapu
 
         }
 
-        public class CComparer : IComparer<FrnFileOrigin>
-        {
-            public int Compare(FrnFileOrigin left, FrnFileOrigin right)
-            {
-                if (left.weight > right.weight)
-                    return -1;
-                else if (left.weight == right.weight)
-                    return 0;
-                else
-                    return 1;
-            }
-        }
-
+      
         //记录相关*
         private void UpdateRecord(FrnFileOrigin targ)
         {
@@ -1867,50 +1894,14 @@ namespace tdsCshapu
                         Record[i].FileName = targ.FileName;
 
                         existed = true;
-
-                        if (Record[i].weight < 600)
-                        {
-                            Record[i].weight = (short)(Record[i].weight + 50);
-                        }
+                                              
                     }
-                    else
-                    {
-                        Record[i].weight = (short)(Record[i].weight - 5);
-
-                    }
-                    if (Record[i].weight < 10)
-                    {
-                        Record[i].weight = 10;
-                    }
-
 
                 }
             }
             if (existed == false)
             {
-                ((FrnFileOrigin)targ).weight = 50;
-
-                if (Path.GetExtension(getfile(targ.FileName)).Equals(".xls", StringComparison.OrdinalIgnoreCase) ||
-                    Path.GetExtension(getfile(targ.FileName)).Equals(".xlsx", StringComparison.OrdinalIgnoreCase) ||
-                    Path.GetExtension(getfile(targ.FileName)).Equals(".doc", StringComparison.OrdinalIgnoreCase) ||
-                    Path.GetExtension(getfile(targ.FileName)).Equals(".docx", StringComparison.OrdinalIgnoreCase) ||
-                    Path.GetExtension(getfile(targ.FileName)).Equals(".ppt", StringComparison.OrdinalIgnoreCase) ||
-                    Path.GetExtension(getfile(targ.FileName)).Equals(".pptx", StringComparison.OrdinalIgnoreCase))
-                {
-                    FrnFileOrigin tmp = new FrnFileOrigin(targ.fileReferenceNumber, targ.FileName)
-                    {
-                        parentFrn = targ.parentFrn,                        
-                        weight = ((FrnFileOrigin)targ).weight
-                    };
-                    tmp.VolumeName=targ.VolumeName;
-                    Record.Add(tmp);
-                }
-                else
-                {
                     Record.Add((FrnFileOrigin)targ);
-
-                }
-
             }
 
 
@@ -1946,7 +1937,7 @@ namespace tdsCshapu
                     string fp = GetPath(f);
                     if (File.Exists(fp) || Directory.Exists(fp))
                     {
-                        fs.WriteLine(f.fileReferenceNumber.ToString() + "@" + f.parentFrn.fileReferenceNumber.ToString() + "@" + f.FileName + "@" + 0 + "@" + f.VolumeName + "@" + f.weight);
+                        fs.WriteLine(f.fileReferenceNumber.ToString() + "@" + f.parentFrn.fileReferenceNumber.ToString() + "@" + f.FileName + "@" + 0 + "@" + f.VolumeName);
                     }
                 }
                 fs.Close();
@@ -1974,35 +1965,10 @@ namespace tdsCshapu
 
                                 if (KeyValue != null && KeyValue.GetUpperBound(0) == 5)
                                 {
-                                    if (Path.GetExtension(getfile(KeyValue[2])).Equals(".xls", StringComparison.OrdinalIgnoreCase) ||
-                     Path.GetExtension(getfile(KeyValue[2])).Equals(".xlsx", StringComparison.OrdinalIgnoreCase) ||
-                     Path.GetExtension(getfile(KeyValue[2])).Equals(".doc", StringComparison.OrdinalIgnoreCase) ||
-                     Path.GetExtension(getfile(KeyValue[2])).Equals(".docx", StringComparison.OrdinalIgnoreCase) ||
-                     Path.GetExtension(getfile(KeyValue[2])).Equals(".ppt", StringComparison.OrdinalIgnoreCase) ||
-                     Path.GetExtension(getfile(KeyValue[2])).Equals(".pptx", StringComparison.OrdinalIgnoreCase))
-                                    {   //特殊文件
-                                        FrnFileOrigin f = new FrnFileOrigin(UInt64.Parse(KeyValue[0]), KeyValue[2])
-                                        {                                                                                    
-                                            parentFrn = fileSysList[int.Parse(KeyValue[3])].files[UInt64.Parse(KeyValue[1])],                                        
-                                            
-                                            weight = short.Parse(KeyValue[5])
-                                        };
-                                        f.VolumeName=KeyValue[4];
 
-                                        for (int i = 0; i < 10; i++)
-                                        {
-                                            GetPath(f);
-                                        }
-                                        Record.Add(f);
-
-                                    }
-                                    else  //其他文件
+                                    if ((fileSysList[int.Parse(KeyValue[3])].files.TryGetValue(UInt64.Parse(KeyValue[0]), out FrnFileOrigin f)))
                                     {
-                                        if ((fileSysList[int.Parse(KeyValue[3])].files.TryGetValue(UInt64.Parse(KeyValue[0]), out FrnFileOrigin f)))
-                                        {
-                                            ((FrnFileOrigin)f).weight = Int16.Parse(KeyValue[5]);
-                                            Record.Add(f as FrnFileOrigin);
-                                        }
+                                        Record.Add(f as FrnFileOrigin);
                                     }
                                 }
                             }
