@@ -89,6 +89,22 @@ namespace PInvoke
         #endregion
 
         #region constants
+        // CTL_CODE( DeviceType, Function, Method, Access ) (((DeviceType) << 16) | ((Access) << 14) | ((Function) << 2) | (Method))
+        private const UInt32 FILE_DEVICE_FILE_SYSTEM = 0x00000009;
+
+        //public const OBJ_KERNEL_HANDLE = 0x200;
+        private const UInt32 METHOD_NEITHER = 3;
+
+        private const UInt32 METHOD_BUFFERED = 0;
+
+        private const UInt32 FILE_ANY_ACCESS = 0;
+
+        private const UInt32 FILE_SPECIAL_ACCESS = 0;
+
+        private const UInt32 FILE_READ_ACCESS = 1;
+
+        private const UInt32 FILE_WRITE_ACCESS = 2;
+
         public const Int32 INVALID_HANDLE_VALUE = -1;
 
         public const UInt32 GENERIC_READ = 0x80000000;
@@ -110,17 +126,6 @@ namespace PInvoke
         public const UInt32 FILE_OPEN_BY_FILE_ID = 0x2000;
         public const UInt32 FILE_OPEN = 0x1;
         public const UInt32 OBJ_CASE_INSENSITIVE = 0x40;
-        //public const OBJ_KERNEL_HANDLE = 0x200;
-
-        // CTL_CODE( DeviceType, Function, Method, Access ) (((DeviceType) << 16) | ((Access) << 14) | ((Function) << 2) | (Method))
-        private const UInt32 FILE_DEVICE_FILE_SYSTEM = 0x00000009;
-        private const UInt32 METHOD_NEITHER = 3;
-        private const UInt32 METHOD_BUFFERED = 0;
-        private const UInt32 FILE_ANY_ACCESS = 0;
-        private const UInt32 FILE_SPECIAL_ACCESS = 0;
-        private const UInt32 FILE_READ_ACCESS = 1;
-        private const UInt32 FILE_WRITE_ACCESS = 2;
-
         public const UInt32 USN_REASON_DATA_OVERWRITE = 0x00000001;
         public const UInt32 USN_REASON_DATA_EXTEND = 0x00000002;
         public const UInt32 USN_REASON_DATA_TRUNCATION = 0x00000004;
@@ -143,10 +148,6 @@ namespace PInvoke
         public const UInt32 USN_REASON_STREAM_CHANGE = 0x00200000;
         public const UInt32 USN_REASON_CLOSE = 0x80000000;
 
-        public static Int32 GWL_EXSTYLE = -20;
-        public static Int32 WS_EX_LAYERED = 0x00080000;
-        public static Int32 WS_EX_TRANSPARENT = 0x00000020;
-
         public const UInt32 FSCTL_GET_OBJECT_ID = 0x9009c;
 
         // FSCTL_ENUM_USN_DATA = CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 44,  METHOD_NEITHER, FILE_ANY_ACCESS)
@@ -164,6 +165,9 @@ namespace PInvoke
         // FSCTL_DELETE_USN_JOURNAL        CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 62, METHOD_BUFFERED, FILE_ANY_ACCESS)
         public const UInt32 FSCTL_DELETE_USN_JOURNAL = (FILE_DEVICE_FILE_SYSTEM << 16) | (FILE_ANY_ACCESS << 14) | (62 << 2) | METHOD_BUFFERED;
 
+        public static Int32 GWL_EXSTYLE = -20;
+        public static Int32 WS_EX_LAYERED = 0x00080000;
+        public static Int32 WS_EX_TRANSPARENT = 0x00000020;
         #endregion
 
         #region dll imports
@@ -496,134 +500,6 @@ namespace PInvoke
         }
 
         /// <summary>
-        /// Contains the USN Record Length(32bits), USN(64bits), File Reference Number(64bits), 
-        /// Parent File Reference Number(64bits), Reason Code(32bits), File Attributes(32bits),
-        /// File Name Length(32bits), the File Name Offset(32bits) and the File Name.
-        /// </summary>
-        public class UsnEntry : IComparable<UsnEntry>
-        {
-            private const int FR_OFFSET = 8;
-            private const int PFR_OFFSET = 16;
-            private const int USN_OFFSET = 24;
-            private const int REASON_OFFSET = 40;
-            public const int FA_OFFSET = 52;
-            private const int FNL_OFFSET = 56;
-            private const int FN_OFFSET = 58;
-
-            private UInt32 _RecordLength;
-            public UInt32 RecordLength
-            {
-                get { return _RecordLength; }
-            }
-
-            private Int64 _usn;
-            public Int64 USN
-            {
-                get { return _usn; }
-            }
-
-            private UInt64 _frn;
-            public UInt64 FileReferenceNumber
-            {
-                get { return _frn; }
-            }
-
-            private UInt64 _pfrn;
-            public UInt64 ParentFileReferenceNumber
-            {
-                get { return _pfrn; }
-            }
-
-            private UInt32 _reason;
-            public UInt32 Reason
-            {
-                get { return _reason; }
-            }
-
-            private string _name;
-            public string Name
-            {
-                get
-                {
-                    return _name;
-                }
-            }
-
-            private string _oldName;
-            public string OldName
-            {
-                get
-                {
-                    if (0 != (_fileAttributes & USN_REASON_RENAME_OLD_NAME))
-                    {
-                        return _oldName;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                }
-                set { _oldName = value; }
-            }
-
-            private UInt32 _fileAttributes;
-            public bool IsFolder
-            {
-                get
-                {
-                    bool bRtn = false;
-                    if (0 != (_fileAttributes & Win32Api.FILE_ATTRIBUTE_DIRECTORY))
-                    {
-                        bRtn = true;
-                    }
-                    return bRtn;
-                }
-            }
-
-            public bool IsFile
-            {
-                get
-                {
-                    bool bRtn = false;
-                    if (0 == (_fileAttributes & Win32Api.FILE_ATTRIBUTE_DIRECTORY))
-                    {
-                        bRtn = true;
-                    }
-                    return bRtn;
-                }
-            }
-
-            /// <summary>
-            /// USN Record Constructor
-            /// </summary>
-            /// <param name="p">Buffer pointer to first byte of the USN Record</param>
-            public UsnEntry(IntPtr ptrToUsnRecord)
-            {
-                _RecordLength = (UInt32)Marshal.ReadInt32(ptrToUsnRecord);
-                _frn = (UInt64)Marshal.ReadInt64(ptrToUsnRecord, FR_OFFSET);
-                _pfrn = (UInt64)Marshal.ReadInt64(ptrToUsnRecord, PFR_OFFSET);
-                _usn = (Int64)Marshal.ReadInt64(ptrToUsnRecord, USN_OFFSET);
-                _reason = (UInt32)Marshal.ReadInt32(ptrToUsnRecord, REASON_OFFSET);
-                _fileAttributes = (UInt32)Marshal.ReadInt32(ptrToUsnRecord, FA_OFFSET);
-                short fileNameLength = Marshal.ReadInt16(ptrToUsnRecord, FNL_OFFSET);
-                short fileNameOffset = Marshal.ReadInt16(ptrToUsnRecord, FN_OFFSET);
-                _name = Marshal.PtrToStringUni(new IntPtr(ptrToUsnRecord.ToInt64() + fileNameOffset), fileNameLength / sizeof(char));
-
-            }
-
-
-
-            #region IComparable<UsnEntry> Members
-
-            public int CompareTo(UsnEntry other)
-            {
-                return string.Compare(this.Name, other.Name, true);
-            }
-
-            #endregion
-        }
-
-        /// <summary>
         /// Contains the Start USN(64bits), Reason Mask(32bits), Return Only on Close flag(32bits),
         /// Time Out(64bits), Bytes To Wait For(64bits), and USN Journal ID(64bits).
         /// </summary>
@@ -700,6 +576,132 @@ namespace PInvoke
             public IntPtr Buffer;
         }
 
+        /// <summary>
+        /// Contains the USN Record Length(32bits), USN(64bits), File Reference Number(64bits), 
+        /// Parent File Reference Number(64bits), Reason Code(32bits), File Attributes(32bits),
+        /// File Name Length(32bits), the File Name Offset(32bits) and the File Name.
+        /// </summary>
+        public class UsnEntry : IComparable<UsnEntry>
+        {
+            private const int FR_OFFSET = 8;
+            private const int PFR_OFFSET = 16;
+            private const int USN_OFFSET = 24;
+            private const int REASON_OFFSET = 40;
+            private const int FNL_OFFSET = 56;
+
+            private const int FN_OFFSET = 58;
+
+            private UInt32 _RecordLength;
+
+            private Int64 _usn;
+
+            private UInt64 _frn;
+
+            private UInt64 _pfrn;
+
+            private UInt32 _reason;
+
+            private string _name;
+
+            private string _oldName;
+
+            private UInt32 _fileAttributes;
+
+            public const int FA_OFFSET = 52;
+            /// <summary>
+            /// USN Record Constructor
+            /// </summary>
+            /// <param name="p">Buffer pointer to first byte of the USN Record</param>
+            public UsnEntry(IntPtr ptrToUsnRecord)
+            {
+                _RecordLength = (UInt32)Marshal.ReadInt32(ptrToUsnRecord);
+                _frn = (UInt64)Marshal.ReadInt64(ptrToUsnRecord, FR_OFFSET);
+                _pfrn = (UInt64)Marshal.ReadInt64(ptrToUsnRecord, PFR_OFFSET);
+                _usn = (Int64)Marshal.ReadInt64(ptrToUsnRecord, USN_OFFSET);
+                _reason = (UInt32)Marshal.ReadInt32(ptrToUsnRecord, REASON_OFFSET);
+                _fileAttributes = (UInt32)Marshal.ReadInt32(ptrToUsnRecord, FA_OFFSET);
+                short fileNameLength = Marshal.ReadInt16(ptrToUsnRecord, FNL_OFFSET);
+                short fileNameOffset = Marshal.ReadInt16(ptrToUsnRecord, FN_OFFSET);
+                _name = Marshal.PtrToStringUni(new IntPtr(ptrToUsnRecord.ToInt64() + fileNameOffset), fileNameLength / sizeof(char));
+
+            }
+
+            public UInt32 RecordLength
+            {
+                get { return _RecordLength; }
+            }
+            public Int64 USN
+            {
+                get { return _usn; }
+            }
+            public UInt64 FileReferenceNumber
+            {
+                get { return _frn; }
+            }
+            public UInt64 ParentFileReferenceNumber
+            {
+                get { return _pfrn; }
+            }
+            public UInt32 Reason
+            {
+                get { return _reason; }
+            }
+            public string Name
+            {
+                get
+                {
+                    return _name;
+                }
+            }
+            public string OldName
+            {
+                get
+                {
+                    if (0 != (_fileAttributes & USN_REASON_RENAME_OLD_NAME))
+                    {
+                        return _oldName;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                set { _oldName = value; }
+            }
+            public bool IsFolder
+            {
+                get
+                {
+                    bool bRtn = false;
+                    if (0 != (_fileAttributes & Win32Api.FILE_ATTRIBUTE_DIRECTORY))
+                    {
+                        bRtn = true;
+                    }
+                    return bRtn;
+                }
+            }
+
+            public bool IsFile
+            {
+                get
+                {
+                    bool bRtn = false;
+                    if (0 == (_fileAttributes & Win32Api.FILE_ATTRIBUTE_DIRECTORY))
+                    {
+                        bRtn = true;
+                    }
+                    return bRtn;
+                }
+            }
+            #region IComparable<UsnEntry> Members
+
+            public int CompareTo(UsnEntry other)
+            {
+                return string.Compare(this.Name, other.Name, true);
+            }
+
+            #endregion
+        }
         #endregion
 
         #region functions
@@ -765,6 +767,66 @@ namespace PInvoke
             return name;
         }
         */
+
+        /// <summary>
+        /// Encrypt the string 'LicenseString' argument and return as a MemoryStream.
+        /// </summary>
+        /// <param name="LicenseString">The string value to encrypt</param>
+        /// <returns>A MemoryStream which contains the encrypted value of 'LicenseString'</returns>
+        private static MemoryStream EncryptLicenseString(string LicenseString)
+        {
+            Encoding enc = Encoding.Unicode;
+
+            byte[] ba = enc.GetBytes(LicenseString);
+            MemoryStream ms = new MemoryStream();
+
+            RC2CryptoServiceProvider rc2 = new RC2CryptoServiceProvider();
+            rc2.Key = GetBytesFromHexString("7a6823a42a3a3ae27057c647db812d0");
+            rc2.IV = GetBytesFromHexString("827d961224d99b2d");
+
+            CryptoStream cs = new CryptoStream(ms, rc2.CreateEncryptor(), CryptoStreamMode.Write);
+            cs.Write(ba, 0, ba.Length);
+
+            cs.Close();
+            cs.Dispose();
+            rc2 = null;
+            return ms;
+        }
+
+        /// <summary>
+        /// Given an IntPtr to a bufer and the number of bytes, decrypt the buffer and return an 
+        /// unencrypted text string.
+        /// </summary>
+        /// <param name="buffer">An IntPtr to the 'buffer' containing the encrypted string</param>
+        /// <param name="nBytes">The number of bytes in 'buffer' to decrypt</param>
+        /// <returns></returns>
+        private static string DecryptLicenseString(IntPtr buffer, uint nBytes)
+        {
+            byte[] ba = new byte[nBytes];
+            for (int i = 0; i < nBytes; i++)
+            {
+                ba[i] = Marshal.ReadByte(buffer, i);
+            }
+            MemoryStream ms = new MemoryStream(ba);
+
+            RC2CryptoServiceProvider rc2 = new RC2CryptoServiceProvider();
+            rc2.Key = GetBytesFromHexString("7a6823a42a3a3ae27057c647db812d0");
+            rc2.IV = GetBytesFromHexString("827d961224d99b2d");
+
+            CryptoStream cs = new CryptoStream(ms, rc2.CreateDecryptor(), CryptoStreamMode.Read);
+            string licenseString = string.Empty;
+            byte[] ba1 = new byte[4096];
+            int irtn = cs.Read(ba1, 0, 4096);
+            Encoding enc = Encoding.Unicode;
+            licenseString = enc.GetString(ba1, 0, irtn);
+
+            cs.Close();
+            cs.Dispose();
+            ms.Close();
+            ms.Dispose();
+            rc2 = null;
+            return licenseString;
+        }
 
         /// <summary>
         /// Writes the data in 'text' to the alternate stream ':Description' of the file 'currentFile.
@@ -1039,67 +1101,6 @@ namespace PInvoke
                 }
             }
         }
-
-        /// <summary>
-        /// Encrypt the string 'LicenseString' argument and return as a MemoryStream.
-        /// </summary>
-        /// <param name="LicenseString">The string value to encrypt</param>
-        /// <returns>A MemoryStream which contains the encrypted value of 'LicenseString'</returns>
-        private static MemoryStream EncryptLicenseString(string LicenseString)
-        {
-            Encoding enc = Encoding.Unicode;
-
-            byte[] ba = enc.GetBytes(LicenseString);
-            MemoryStream ms = new MemoryStream();
-
-            RC2CryptoServiceProvider rc2 = new RC2CryptoServiceProvider();
-            rc2.Key = GetBytesFromHexString("7a6823a42a3a3ae27057c647db812d0");
-            rc2.IV = GetBytesFromHexString("827d961224d99b2d");
-
-            CryptoStream cs = new CryptoStream(ms, rc2.CreateEncryptor(), CryptoStreamMode.Write);
-            cs.Write(ba, 0, ba.Length);
-
-            cs.Close();
-            cs.Dispose();
-            rc2 = null;
-            return ms;
-        }
-
-        /// <summary>
-        /// Given an IntPtr to a bufer and the number of bytes, decrypt the buffer and return an 
-        /// unencrypted text string.
-        /// </summary>
-        /// <param name="buffer">An IntPtr to the 'buffer' containing the encrypted string</param>
-        /// <param name="nBytes">The number of bytes in 'buffer' to decrypt</param>
-        /// <returns></returns>
-        private static string DecryptLicenseString(IntPtr buffer, uint nBytes)
-        {
-            byte[] ba = new byte[nBytes];
-            for (int i = 0; i < nBytes; i++)
-            {
-                ba[i] = Marshal.ReadByte(buffer, i);
-            }
-            MemoryStream ms = new MemoryStream(ba);
-
-            RC2CryptoServiceProvider rc2 = new RC2CryptoServiceProvider();
-            rc2.Key = GetBytesFromHexString("7a6823a42a3a3ae27057c647db812d0");
-            rc2.IV = GetBytesFromHexString("827d961224d99b2d");
-
-            CryptoStream cs = new CryptoStream(ms, rc2.CreateDecryptor(), CryptoStreamMode.Read);
-            string licenseString = string.Empty;
-            byte[] ba1 = new byte[4096];
-            int irtn = cs.Read(ba1, 0, 4096);
-            Encoding enc = Encoding.Unicode;
-            licenseString = enc.GetString(ba1, 0, irtn);
-
-            cs.Close();
-            cs.Dispose();
-            ms.Close();
-            ms.Dispose();
-            rc2 = null;
-            return licenseString;
-        }
-
         /// <summary>
         /// Gets the byte array generated from the value of 'hexString'.
         /// </summary>

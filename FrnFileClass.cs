@@ -8,15 +8,22 @@ namespace QueryEngine
     public class FrnFileOrigin//  : IComparable<FrnFileOrigin>
     {
         private string volumeName; //根目录名称
+        private string fileName = "";
+
         public UInt64 fileReferenceNumber;
         public FrnFileOrigin parentFrn = null;
 
         public UInt64 keyindex;
-        private string fileName = "";
         public int? IcoIndex;
         public bool orderFirst=false;
-        
-        public string FileName 
+
+        public FrnFileOrigin(UInt64 fileReferenceNumber, string fileName)
+        {
+            this.fileReferenceNumber = fileReferenceNumber;
+            this.FileName = fileName;
+        }
+
+        public string FileName
         { get => fileName; 
             
             set
@@ -33,13 +40,6 @@ namespace QueryEngine
                 volumeName = string.Intern(value.Trim('\\').Trim(':'));
             }
         }
-
-        public FrnFileOrigin(UInt64 fileReferenceNumber, string fileName)
-        {
-            this.fileReferenceNumber = fileReferenceNumber;
-            this.FileName = fileName;
-        }               
-
    }
 
     public sealed class FrnFileFull: FrnFileOrigin

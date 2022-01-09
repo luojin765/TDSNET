@@ -6,33 +6,6 @@ namespace CNChar
 {
     class SpellCN
     {
-        public static string GetSpellCode(string CnStr)
-        {
-            StringBuilder strTemp = new StringBuilder(256);
-
-            strTemp.Clear();
-            int iLen = CnStr.Length;
-
-            int i = 0;
-
-            for (i = 0; i <= iLen - 1; i++)
-            {
-                string c= CnStr.Substring(i, 1);
-
-                if (!SpellDict.ContainsKey(c))
-                {
-                    SpellDict.TryAdd(c, GetCharSpellCode(c));
-                }
-
-                if(SpellDict.TryGetValue(c,out string value))
-                    {
-               strTemp.Append(value);
-                }               
-            }
-            return strTemp.ToString();
-
-        }
-
         /// <summary>
         /// 得到一个汉字的拼音第一个字母，如果是一个英文字母则直接返回大写字母
         /// </summary>
@@ -42,7 +15,7 @@ namespace CNChar
 
         private static string GetCharSpellCode(string CnChar)
         {
-            
+
             long iCnChar;
             Encoding gb2312 = Encoding.GetEncoding("gb2312");
             byte[] ZW = gb2312.GetBytes(CnChar);
@@ -214,6 +187,33 @@ namespace CNChar
             else
 
                 return CnChar;
+
+        }
+
+        public static string GetSpellCode(string CnStr)
+        {
+            StringBuilder strTemp = new StringBuilder(256);
+
+            strTemp.Clear();
+            int iLen = CnStr.Length;
+
+            int i = 0;
+
+            for (i = 0; i <= iLen - 1; i++)
+            {
+                string c= CnStr.Substring(i, 1);
+
+                if (!SpellDict.ContainsKey(c))
+                {
+                    SpellDict.TryAdd(c, GetCharSpellCode(c));
+                }
+
+                if(SpellDict.TryGetValue(c,out string value))
+                    {
+               strTemp.Append(value);
+                }               
+            }
+            return strTemp.ToString();
 
         }
     }

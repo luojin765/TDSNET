@@ -37,20 +37,13 @@ namespace tdsCshapu
         public static extern IntPtr SHGetFileInfo(string pszPath,
     uint dwFileAttributes, ref SHFILEINFO psfi,
     int cbfileInfo, uint uFlags);
-    public struct SHFILEINFO
-    {
-        public IntPtr hIcon;
-        public int iIcon;
-        public int dwAttributes;
-        public string szDisplayName;
-        public string szTypeName;
-    }
-    [DllImport("User32.DLL")]
-    public static extern int SendMessage(IntPtr hWnd,
-    uint Msg, IntPtr wParam, IntPtr lParam);
-    static public void ListViewSysImages(ListView AListView)
-    {
-        SHFILEINFO vFileInfo = new SHFILEINFO();
+        [DllImport("User32.DLL")]
+        public static extern int SendMessage(IntPtr hWnd,
+        uint Msg, IntPtr wParam, IntPtr lParam);
+
+        static public void ListViewSysImages(ListView AListView)
+        {
+            SHFILEINFO vFileInfo = new SHFILEINFO();
             //IntPtr 
             //vImageList = SHGetFileInfo("", 0, ref vFileInfo,
             //Marshal.SizeOf(vFileInfo), SHGFI_SHELLICONSIZE |
@@ -61,14 +54,14 @@ namespace tdsCshapu
             // 不要尺寸 sysiconsize
             IntPtr vImageList = SHGetFileInfo("", 0, ref vFileInfo,
         Marshal.SizeOf(vFileInfo), SHGFI_SYSICONINDEX | SHGFI_SMALLICON);  //SMALLICON改large
-        SendMessage(AListView.Handle, LVM_SETIMAGELIST, (IntPtr)LVSIL_SMALL,
-        vImageList);
-           
-    }
+            SendMessage(AListView.Handle, LVM_SETIMAGELIST, (IntPtr)LVSIL_SMALL,
+            vImageList);
+
+        }
 
         [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
         static public int FileIconIndex(string AFileName)
-    {
+        {
             try
             {
                 SHFILEINFO vFileInfo = new SHFILEINFO();
@@ -80,8 +73,15 @@ namespace tdsCshapu
             {
                 return 0;
             }
+        }
+
+        public struct SHFILEINFO
+        {
+        public IntPtr hIcon;
+        public int iIcon;
+        public int dwAttributes;
+        public string szDisplayName;
+        public string szTypeName;
     }
-
-
     }
 }

@@ -387,32 +387,6 @@ namespace SystemMenu
         /// <summary>
         /// Shows the context menu
         /// </summary>
-        /// <param name="files">FileInfos (should all be in same directory)</param>
-        /// <param name="pointScreen">Where to show the menu</param>
-        public void ShowContextMenu(FileInfo[] files, Point pointScreen)
-        {
-            // Release all resources first.
-            ReleaseAll();
-            _arrPIDLs = GetPIDLs(files);
-            this.ShowContextMenu(pointScreen);
-        }
-
-        /// <summary>
-        /// Shows the context menu
-        /// </summary>
-        /// <param name="dirs">DirectoryInfos (should all be in same directory)</param>
-        /// <param name="pointScreen">Where to show the menu</param>
-        public void ShowContextMenu(DirectoryInfo[] dirs, Point pointScreen)
-        {
-            // Release all resources first.
-            ReleaseAll();
-            _arrPIDLs = GetPIDLs(dirs);
-            this.ShowContextMenu(pointScreen);
-        }
-
-        /// <summary>
-        /// Shows the context menu
-        /// </summary>
         /// <param name="arrFI">FileInfos (should all be in same directory)</param>
         /// <param name="pointScreen">Where to show the menu</param>
         private void ShowContextMenu(Point pointScreen)
@@ -492,6 +466,32 @@ namespace SystemMenu
 
                 ReleaseAll();
             }
+        }
+
+        /// <summary>
+        /// Shows the context menu
+        /// </summary>
+        /// <param name="files">FileInfos (should all be in same directory)</param>
+        /// <param name="pointScreen">Where to show the menu</param>
+        public void ShowContextMenu(FileInfo[] files, Point pointScreen)
+        {
+            // Release all resources first.
+            ReleaseAll();
+            _arrPIDLs = GetPIDLs(files);
+            this.ShowContextMenu(pointScreen);
+        }
+
+        /// <summary>
+        /// Shows the context menu
+        /// </summary>
+        /// <param name="dirs">DirectoryInfos (should all be in same directory)</param>
+        /// <param name="pointScreen">Where to show the menu</param>
+        public void ShowContextMenu(DirectoryInfo[] dirs, Point pointScreen)
+        {
+            // Release all resources first.
+            ReleaseAll();
+            _arrPIDLs = GetPIDLs(dirs);
+            this.ShowContextMenu(pointScreen);
         }
         #endregion
 
@@ -1388,15 +1388,32 @@ namespace SystemMenu
     public class LocalWindowsHook
     {
         // ************************************************************************
-        // Filter function delegate
-        public delegate int HookProc(int code, IntPtr wParam, IntPtr lParam);
-        // ************************************************************************
-
-        // ************************************************************************
         // Internal properties
         protected IntPtr m_hhook = IntPtr.Zero;
+
+        // ************************************************************************
         protected HookProc m_filterFunc = null;
+
         protected HookType m_hookType;
+
+        // ************************************************************************
+        // Class constructor(s)
+        public LocalWindowsHook(HookType hook)
+        {
+            m_hookType = hook;
+            m_filterFunc = new HookProc(this.CoreHookProc);
+        }
+
+        // ************************************************************************
+        public LocalWindowsHook(HookType hook, HookProc func)
+        {
+            m_hookType = hook;
+            m_filterFunc = func;
+        }
+
+        // ************************************************************************
+        // Filter function delegate
+        public delegate int HookProc(int code, IntPtr wParam, IntPtr lParam);
         // ************************************************************************
 
         // ************************************************************************
@@ -1410,20 +1427,6 @@ namespace SystemMenu
         protected void OnHookInvoked(HookEventArgs e)
         {
             HookInvoked?.Invoke(this, e);
-        }
-        // ************************************************************************
-
-        // ************************************************************************
-        // Class constructor(s)
-        public LocalWindowsHook(HookType hook)
-        {
-            m_hookType = hook;
-            m_filterFunc = new HookProc(this.CoreHookProc);
-        }
-        public LocalWindowsHook(HookType hook, HookProc func)
-        {
-            m_hookType = hook;
-            m_filterFunc = func;
         }
         // ************************************************************************
 
