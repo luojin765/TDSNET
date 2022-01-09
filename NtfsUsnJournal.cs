@@ -340,14 +340,11 @@ namespace UsnJournal
 
 
         ///Getall
-        public Dictionary<UInt64, FrnFileOrigin> GetNtfsVolumeAllentries(string volname, out UsnJournalReturnCode usnRtnCode)
+        public Dictionary<UInt64, FrnFileOrigin> GetNtfsVolumeAllentries(char volname, out UsnJournalReturnCode usnRtnCode, FileSys filesys)
         {
-            Dictionary<UInt64, FrnFileOrigin> foldersAndFiles = new Dictionary<UInt64, FrnFileOrigin>();
-            FrnFileOrigin f;
+            Dictionary<UInt64, FrnFileOrigin> foldersAndFiles = filesys.files;
 
-            foldersAndFiles.Add(ROOT_FILE_REFERENCE_NUMBER, new FrnFileFull(ROOT_FILE_REFERENCE_NUMBER, null, ""));
-            foldersAndFiles.Last().Value.VolumeName=volname;
-
+            foldersAndFiles.Add(ROOT_FILE_REFERENCE_NUMBER, FrnFileOrigin.Create("",volname, ROOT_FILE_REFERENCE_NUMBER, null));
 
             usnRtnCode = UsnJournalReturnCode.VOLUME_NOT_NTFS;
             if (bNtfsVolume)
@@ -405,10 +402,9 @@ namespace UsnJournal
                                     continue;
                                 }
 
-                                f = new FrnFileFull(usnEntry.FileReferenceNumber, usnEntry.ParentFileReferenceNumber, usnEntry.Name);
-                                f.VolumeName=volname;
+                                FrnFileOrigin f = FrnFileOrigin.Create(usnEntry.Name, volname, usnEntry.FileReferenceNumber, usnEntry.ParentFileReferenceNumber);
                                     //ddd
-                                    foldersAndFiles.Add(f.fileReferenceNumber, f);                             
+                                    foldersAndFiles.Add(f.fileReferenceNumber, f);
 
 
                                 pUsnRecord = new IntPtr(pUsnRecord.ToInt64() + usnEntry.RecordLength);

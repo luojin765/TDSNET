@@ -37,7 +37,8 @@ namespace SystemMenu
         /// <summary>Default constructor</summary>
         public ShellContextMenu()
         {
-            this.CreateHandle(new CreateParams());
+            this.CreateHandle(new 
+                ());
         }
         #endregion
 
