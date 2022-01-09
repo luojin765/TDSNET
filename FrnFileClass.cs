@@ -1,9 +1,12 @@
 ﻿using CNChar;
 using PInvoke;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using UsnJournal;
 
 namespace QueryEngine
@@ -18,8 +21,8 @@ namespace QueryEngine
         {
             parentFileReferenceNumber = parentFileRefNum;
         }
-    }
-    
+    }        
+     
     public class FrnFileOrigin
     {
         public char VolumeName; //根目录名称
@@ -39,6 +42,7 @@ namespace QueryEngine
             FrnFileOrigin f = new FrnFileOrigin(filename, vol, fileRefNum);
 
             f.additionInfo = new AdditionInfo(parentFileRefNum);
+
             return f;
         }
 
@@ -61,18 +65,55 @@ namespace QueryEngine
 
     public class FileSys
     {
+        public const int SPLITFILENUMBER =100000;
         public DriveInfo driveInfo;
         public NtfsUsnJournal ntfsUsnJournal;
         public Dictionary<ulong, FrnFileOrigin> files=new Dictionary<ulong, FrnFileOrigin>();
         public Win32Api.USN_JOURNAL_DATA usnStates;
-        public List<Array> SplitList = new List<Array>();
+        public Collection<ArrayList> SplitedFiles = new Collection<ArrayList>();
         public FileSys(DriveInfo dInfo)
         {
             driveInfo = dInfo;
         }
 
-        public void Split(int splitNum)
+        public void Split(int splitNum=-1)
         {
+            if (splitNum < 1)
+            {
+                splitNum = (int)((double)files.Count / SPLITFILENUMBER);
+            }
+
+            if (splitNum <1)
+            {
+                splitNum = 1;
+            }
+            else if(splitNum>16)
+            {
+                splitNum = 16;
+            }
+
+            int index = -1;
+            int partNum = (int)((double)files.Count / (double)splitNum)+100;
+
+            foreach (FrnFileOrigin f in files.Values)
+            {
+                if (index < 0)
+                {
+                SplitedFiles.Add(new ArrayList(files.Count / partNum));                
+                }
+                
+
+                if (index > partNum)
+                {
+                    SplitedFiles.Last().TrimToSize();
+                    index = -1;
+                }
+                else
+                {
+                    index++;
+                }
+                SplitedFiles.Last().Add(f);
+            }
 
         }
 

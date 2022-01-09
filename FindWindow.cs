@@ -111,6 +111,7 @@ namespace tdsCshapu
                                 IntPtr btnHandle = FindWindowEx(msgHandle, 0, null, b);
                                 if (btnHandle != IntPtr.Zero)
                                 {
+
                                     return true;
 
                                 }

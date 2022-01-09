@@ -67,7 +67,7 @@ namespace tdsCshapu
 
         string USER_PROGRAM_PATH = "";//获取环境目录变量USER
         string ALLUSER_PROGRAM_PATH = "";   //获取环境目录变量ALLUSER
-        ArrayList vlist = new ArrayList();
+        FrnFileOrigin[]  vlist = new FrnFileOrigin[] { };
 
         //listview 绑定
         List<FrnFileOrigin> Record = new List<FrnFileOrigin>() { };
@@ -315,6 +315,7 @@ namespace tdsCshapu
 
                       fs.files = fs.files.OrderByDescending(o => o.Value.additionInfo.orderFirst).ToDictionary(p => p.Key, o => o.Value);
                       fs.Compress();
+                      fs.Split();
                   });
                 SpellDict = null;
             }
@@ -365,8 +366,8 @@ namespace tdsCshapu
             }
             if (e.Item == null)
             {
-                if ((vlist != null && vlist.Count > 0 && e.ItemIndex < vlist.Count && e.ItemIndex >= 0))
-                {
+                if ((vlist != null && vlist.Length > 0 && e.ItemIndex < vlist.Length && e.ItemIndex >= 0))
+                {                    
                     FrnFileOrigin f = (FrnFileOrigin)vlist[e.ItemIndex];
                     string name = getfile(f.FileName);
                     string path2 = GetPath(f);
@@ -431,8 +432,10 @@ namespace tdsCshapu
 
             while (Threadrunning == true)
             {
-                Task[] taskList = new Task[fileSysList.Count];
-                ArrayList vvlist = new ArrayList(1000000);
+                Collection<Task<FrnFileOrigin[]>> taskPool = new Collection<Task<FrnFileOrigin[]>>();
+                
+                FrnFileOrigin[] vvlist = null;
+
                 string[] dwords = null;
                 string[] words;
                 int dlen = 0;
@@ -505,8 +508,6 @@ namespace tdsCshapu
 
                 }
 
-                bool Finded;
-
                 try
                 {
                     if (DoUSNupdate)
@@ -534,10 +535,8 @@ namespace tdsCshapu
                     for (int d = 0; d < fileSysList.Count; d++)
                     {
 
-                        FileSys fs = fileSysList[d];
-                        Dictionary<UInt64, FrnFileOrigin> l = fs.files;
-                        //并行过慢,PARALLEL.foreach,改单线程运行`
-
+                        var fs = fileSysList[d];
+                        var l = fs.files;                        
 
                         if (!(l.Values.Count > 0 && Directory.Exists(fs.driveInfo.Name))) continue;
 
@@ -552,13 +551,19 @@ namespace tdsCshapu
                                     break;
                                 }
                             }
+
                             if (!driverFound)
                             {
                                 continue;
                             }
                         }
 
-                        taskList[d]= Task.Factory.StartNew(() => executeDelegate(DoDirectory, fs.files, dwords, words, unidwords, uniwords, ref vvlist));
+                        foreach (ArrayList al in fs.SplitedFiles)
+                        {
+
+                            taskPool.Add(Task.Factory.StartNew(() => executeDelegate(DoDirectory, fs.files, al, dwords, words, unidwords, uniwords)));                            
+                        }
+
 
                     }//foreach
 
@@ -568,22 +573,51 @@ namespace tdsCshapu
                     Log_write(ex.Message);
                 }
 
-                Task.WaitAll(taskList);
-               
-                if (vvlist.Count > 0)
-                {
-                    vvlist.TrimToSize();
 
-                    if (vvlist.Count < vlist.Count)
+                Task.WaitAll(taskPool.ToArray());
+                if (Threadrest) { goto Restart; }
+
+
+                int size = 0;
+
+                foreach(Task<FrnFileOrigin[]> tkr in taskPool)
+                {
+                    if (tkr.Result != null)
+                    {
+                    size = size + tkr.Result.Length;
+                    }
+                }
+
+                vvlist = new FrnFileOrigin[size];
+
+                int index=0;
+                foreach (Task<FrnFileOrigin[]> tkr in taskPool)
+                {
+                    if (tkr.Result!=null)
+                    {
+                        tkr.Result.CopyTo(vvlist, index);
+                        index = index+tkr.Result.Length;
+                    }
+                }
+
+                taskPool = null;
+
+                if (Threadrest) { goto Restart; }
+
+
+                if (vvlist.Length > 0)
+                {                   
+
+                    if (vvlist.Length < vlist.Length)
                     {
 
-                        istView1.BeginInvoke(new System.EventHandler(listupdate), vvlist.Count);  //必须异步BeginInvoke，不然不同步
+                        istView1.BeginInvoke(new System.EventHandler(listupdate), vvlist.Length);  //必须异步BeginInvoke，不然不同步
                         vlist = vvlist;
                     }
                     else
                     {
                         vlist = vvlist;
-                        istView1.BeginInvoke(new System.EventHandler(listupdate), vvlist.Count);  //必须异步BeginInvoke，不然不同步
+                        istView1.BeginInvoke(new System.EventHandler(listupdate), vvlist.Length);  //必须异步BeginInvoke，不然不同步
                     }
 
                 }
@@ -594,18 +628,19 @@ namespace tdsCshapu
 
 
                 refcache = true;
-            Restart:
-                vvlist.TrimToSize();
+            Restart:;
+              
             }
         }
 
-        delegate void ExecuteDelegate(bool DoDirectory, Dictionary<ulong, FrnFileOrigin> l, string[] dwords, string[] words, ulong unidwords, ulong uniwords, ref ArrayList vvlist);
+        delegate FrnFileOrigin[] ExecuteDelegate(bool DoDirectory, Dictionary<ulong, FrnFileOrigin> l, ArrayList al, string[] dwords, string[] words, ulong unidwords, ulong uniwords);
 
-        private void Execute(bool DoDirectory,Dictionary<ulong,FrnFileOrigin> l,string[] dwords,string[] words, ulong unidwords, ulong uniwords, ref ArrayList vvlist)
+        private FrnFileOrigin[] Execute(bool DoDirectory,Dictionary<ulong,FrnFileOrigin> l, ArrayList al, string[] dwords,string[] words, ulong unidwords, ulong uniwords)
         {
-            foreach (FrnFileOrigin f in l.Values)
+            Queue<FrnFileOrigin> vvlist = new Queue<FrnFileOrigin>(FileSys.SPLITFILENUMBER);
+            foreach (FrnFileOrigin f in al)
             {
-                if (Threadrest) { return; }
+                if (Threadrest) { return  new FrnFileOrigin[] { }; }
 
 
                bool Finded = true;
@@ -644,22 +679,22 @@ namespace tdsCshapu
                 if (Finded)
                 {
 
-                    if (Threadrest) { return; }
+                    if (Threadrest) { return new FrnFileOrigin[] { }; }
 
-                    vvlist.Add(f);
+                    vvlist.Enqueue(f);
 
                     if (findmax != 0 && vvlist.Count > findmax && isAll == false) break;
 
-                    if (vvlist.Count == -200)//提前显示
+                    if (vvlist.Count == 200)//提前显示
                     {
 
-                        if (vvlist.Count < vlist.Count)
+                        if (vvlist.Count < vlist.Length)
                         {
                             try
                             {
                                 istView1.BeginInvoke(new System.EventHandler(listupdate_Cache), vvlist.Count);  //异步BeginInvoke
                                 vlist = null;
-                                vlist = vvlist;
+                                vlist = vvlist.ToArray();
                             }
                             catch { }
 
@@ -669,7 +704,7 @@ namespace tdsCshapu
                             try
                             {
                                 vlist = null;
-                                vlist = vvlist;
+                                vlist = vvlist.ToArray();
 
                                 istView1.BeginInvoke(new System.EventHandler(listupdate_Cache), vvlist.Count);  //异步BeginInvoke
                             }
@@ -680,6 +715,9 @@ namespace tdsCshapu
                     }
                 }
             }
+
+            return  vvlist.ToArray();
+
         }
 
         private void listupdate(object o, System.EventArgs e)
@@ -707,12 +745,15 @@ namespace tdsCshapu
 
             }
 
-            if ((findmax != 0 && size > findmax) && isAll == false) { ShowStatuesInfo("搜索到" + findmax.ToString() + "+个对象"); }
+            if ((findmax != 0 && size > findmax) && isAll == false)
+            { 
+                ShowStatuesInfo("搜索到" + findmax.ToString() + "+个对象"); 
+            }
             else
             {
                 //数量控制
                 ShowStatuesInfo("搜索到" + size.ToString() + "个对象");
-               // istView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+               istView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             }
         }
 
@@ -1268,24 +1309,16 @@ namespace tdsCshapu
                 }
 
 
-                if (Record.Count < vlist.Count)
+                if (Record.Count < vlist.Length)
                 {
                     //this.BeginInvoke(new dosize(Sizecalc), Record.Count);
-                    vlist = new ArrayList();
-                    foreach (FrnFileOrigin f in Record)
-                    {
-                        vlist.Add(f);
-                    }
+                    vlist = Record.ToArray();
                     this.BeginInvoke(new System.EventHandler(Recordupdate), Record.Count);  //异步invoke
 
                 }
                 else
                 {
-                    vlist = new ArrayList();
-                    foreach (FrnFileOrigin f in Record)
-                    {
-                        vlist.Add(f);
-                    }
+                    vlist = Record.ToArray();
                     this.BeginInvoke(new System.EventHandler(Recordupdate), Record.Count);
                     //this.BeginInvoke(new dosize(Sizecalc), Record.Count);
 
@@ -1884,16 +1917,10 @@ namespace tdsCshapu
 
             for (int i = 0; i < length; i++)
             {
-                if (i + firstitem < vlist.Count)
+                if (i + firstitem < vlist.Length)
                 {
                     
-                    FrnFileOrigin f = (FrnFileOrigin)vlist[i + firstitem];
-                    if (f == null)
-                    {
-                        CurrentCacheItemsSource[i]= new ListViewItem(new string[] { "", "" });
-
-                        continue;
-                    }
+                    FrnFileOrigin f = (FrnFileOrigin)vlist[i + firstitem];                    
                     string name = getfile(f.FileName);
                     string path2 = GetPath(f);
 
@@ -2286,7 +2313,7 @@ namespace tdsCshapu
             RegisterHotKey(Handle, 8617, 2, HOTK_SHOW);
 
             key1 = ""; key2 = "";
-            vlist.Clear();
+            vlist = new FrnFileOrigin[] { };
 
             usnJournalThread = new Thread(ListFilesThreadStart)
             {
@@ -2327,21 +2354,21 @@ namespace tdsCshapu
 
         public void CompressMem(int mbsize)
         {
-            //System.Runtime.GCSettings.LargeObjectHeapCompactionMode = System.Runtime.GCLargeObjectHeapCompactionMode.CompactOnce;
-            //GC.Collect();
-            //GC.WaitForPendingFinalizers();
-            try
-            {
-                Process Mem;
-                Mem = Process.GetCurrentProcess();
+            System.Runtime.GCSettings.LargeObjectHeapCompactionMode = System.Runtime.GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            //try
+            //{
+            //    Process Mem;
+            //    Mem = Process.GetCurrentProcess();
 
-                SetProcessWorkingSetSize(Mem.Handle, mbsize * 1024 * 1024, mbsize * 1024 * 1024);
+            //    SetProcessWorkingSetSize(Mem.Handle, mbsize * 1024 * 1024, mbsize * 1024 * 1024);
 
-            }
-            catch
-            {
+            //}
+            //catch
+            //{
 
-            }
+            //}
         }
 
         public void Sizecalc(object o, System.EventArgs e)
@@ -2422,7 +2449,7 @@ namespace tdsCshapu
                 catch
                 {
 
-                }
+                }               
             }
             else
             {

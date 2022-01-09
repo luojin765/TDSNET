@@ -65,8 +65,9 @@ namespace tdsCshapu
             try
             {
                 SHFILEINFO vFileInfo = new SHFILEINFO();
-                SHGetFileInfo(AFileName, 0, ref vFileInfo,
+               IntPtr pSH= SHGetFileInfo(AFileName, 0, ref vFileInfo,
                 Marshal.SizeOf(vFileInfo), SHGFI_SYSICONINDEX | SHGFI_USEFILEATTRIBUTES);
+              
                 return vFileInfo.iIcon;
             }
             catch
