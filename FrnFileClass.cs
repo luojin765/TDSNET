@@ -166,15 +166,16 @@ namespace QueryEngine
                             string nacn = SpellCN.GetSpellCode(f.Name.ToUpper());
                             FrnFileOrigin frn = files[f.FileReferenceNumber];
                             frn.keyindex = TBS(nacn);
-                            if (!string.Equals(nacn, frn.FileName.ToUpper()))
+                            if (!string.Equals(nacn, f.Name.ToUpper()))
                             {
-                                frn.FileName = string.Intern("|" + f.Name + "|" + nacn + "|");
+                                frn.FileName = "|" + f.Name + "|" + nacn + "|";
                             }
                             else
                             {
-                                frn.FileName = string.Intern("|" + frn.FileName + "|");
+                                frn.FileName = "|" + f.Name + "|";
                             }
                             frn.parentFrn = files[f.ParentFileReferenceNumber];
+                            files[f.FileReferenceNumber] = frn;
                         }
                     }
 
@@ -197,6 +198,7 @@ namespace QueryEngine
                                                         
                             FrnFileOrigin frn = FrnFileOrigin.Create(name, driveInfo.Name[0],f.FileReferenceNumber, f.ParentFileReferenceNumber);
                             frn.keyindex= TBS(nacn);
+                            frn.parentFrn = files[f.ParentFileReferenceNumber];
                             files.Add(f.FileReferenceNumber, frn);
                         }
                     }

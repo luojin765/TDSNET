@@ -510,9 +510,9 @@ namespace tdsCshapu
 
                 try
                 {
+
                     if (DoUSNupdate)
                     {
-
                         for (int i = 0; i <= fileSysList.Count - 1; i++)
                         {
                             try
@@ -525,9 +525,8 @@ namespace tdsCshapu
                                 continue;
                             }
                         }
-                        DoUSNupdate = false;
-
                     }
+
 
                     if (Threadrest) { goto Restart; }
 
@@ -693,7 +692,6 @@ namespace tdsCshapu
                             try
                             {
                                 istView1.BeginInvoke(new System.EventHandler(listupdate_Cache), vvlist.Count);  //异步BeginInvoke
-                                vlist = null;
                                 vlist = vvlist.ToArray();
                             }
                             catch { }
@@ -703,7 +701,6 @@ namespace tdsCshapu
                         {
                             try
                             {
-                                vlist = null;
                                 vlist = vvlist.ToArray();
 
                                 istView1.BeginInvoke(new System.EventHandler(listupdate_Cache), vvlist.Count);  //异步BeginInvoke
@@ -1101,8 +1098,9 @@ namespace tdsCshapu
                 IsActivated = true;
                 ifhide = true;
 
-
                 DoUSNupdate = true;
+
+
 
                 //取消定位功能定位
 
@@ -2476,7 +2474,7 @@ namespace tdsCshapu
                     {
 
                     }
-
+                   
 
                     GoSearch = new Thread(SearchFilesThreadStart)
                     {
