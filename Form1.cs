@@ -513,7 +513,7 @@ namespace tdsCshapu
 
                     if (DoUSNupdate)
                     {
-                        for (int i = 0; i <= fileSysList.Count - 1; i++)
+                        for (int i = 0; i < fileSysList.Count; i++)
                         {
                             try
                             {

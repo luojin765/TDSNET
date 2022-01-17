@@ -158,63 +158,63 @@ namespace QueryEngine
                 {
                     uint value;
                     value = f.Reason & Win32Api.USN_REASON_RENAME_NEW_NAME;
-
-                    if (0 != value && files.Count > 0)
-                    {
-                        if (files.ContainsKey(f.FileReferenceNumber) && files.ContainsKey(f.ParentFileReferenceNumber))
+                                       
+                        if (0 != value && files.Count > 0)
                         {
-                            string nacn = SpellCN.GetSpellCode(f.Name.ToUpper());
-                            FrnFileOrigin frn = files[f.FileReferenceNumber];
-                            frn.keyindex = TBS(nacn);
-                            if (!string.Equals(nacn, f.Name.ToUpper()))
+                            if (files.ContainsKey(f.FileReferenceNumber) && files.ContainsKey(f.ParentFileReferenceNumber))
                             {
-                                frn.FileName = "|" + f.Name + "|" + nacn + "|";
+                                string nacn = SpellCN.GetSpellCode(f.Name.ToUpper());
+                                FrnFileOrigin frn = files[f.FileReferenceNumber];
+                                frn.keyindex = TBS(nacn);
+                                if (!string.Equals(nacn, f.Name.ToUpper()))
+                                {
+                                    frn.FileName = "|" + f.Name + "|" + nacn + "|";
+                                }
+                                else
+                                {
+                                    frn.FileName = "|" + f.Name + "|";
+                                }
+                                frn.parentFrn = files[f.ParentFileReferenceNumber];
+                                files[f.FileReferenceNumber] = frn;
                             }
-                            else
-                            {
-                                frn.FileName = "|" + f.Name + "|";
-                            }
-                            frn.parentFrn = files[f.ParentFileReferenceNumber];
-                            files[f.FileReferenceNumber] = frn;
                         }
-                    }
 
 
-                    value = f.Reason & Win32Api.USN_REASON_FILE_CREATE;
-                    if (0 != value)
-                    {
-                        if (!files.ContainsKey(f.FileReferenceNumber) && !string.IsNullOrWhiteSpace(f.Name) && files.ContainsKey(f.ParentFileReferenceNumber))
+                        value = f.Reason & Win32Api.USN_REASON_FILE_CREATE;
+                        if (0 != value)
                         {
-                            string nacn = SpellCN.GetSpellCode(f.Name.ToUpper());
-                            string name;
-                            if (!string.Equals(nacn, f.Name.ToUpper()))
+                            if (!files.ContainsKey(f.FileReferenceNumber) && !string.IsNullOrWhiteSpace(f.Name) && files.ContainsKey(f.ParentFileReferenceNumber))
                             {
-                                name = "|" + f.Name + "|" + nacn + "|";
-                            }
-                            else
-                            {
-                                name= "|" + f.Name + "|";
-                            }
-                                                        
-                            FrnFileOrigin frn = FrnFileOrigin.Create(name, driveInfo.Name[0],f.FileReferenceNumber, f.ParentFileReferenceNumber);
-                            frn.keyindex= TBS(nacn);
-                            frn.parentFrn = files[f.ParentFileReferenceNumber];
-                            files.Add(f.FileReferenceNumber, frn);
-                        }
-                    }
+                                string nacn = SpellCN.GetSpellCode(f.Name.ToUpper());
+                                string name;
+                                if (!string.Equals(nacn, f.Name.ToUpper()))
+                                {
+                                    name = "|" + f.Name + "|" + nacn + "|";
+                                }
+                                else
+                                {
+                                    name = "|" + f.Name + "|";
+                                }
 
-                    value = f.Reason & Win32Api.USN_REASON_FILE_DELETE;
-                    if (0 != value && files.Count > 0)
-                    {
-                        if (files.ContainsKey(f.FileReferenceNumber))
-                        {
-                            files.Remove(f.FileReferenceNumber);
+                                FrnFileOrigin frn = FrnFileOrigin.Create(name, driveInfo.Name[0], f.FileReferenceNumber, f.ParentFileReferenceNumber);
+                                frn.keyindex = TBS(nacn);
+                                frn.parentFrn = files[f.ParentFileReferenceNumber];
+                                files.Add(frn.fileReferenceNumber, frn);
+                            FrnFileOrigin fff= files[frn.fileReferenceNumber];
+                            }
                         }
-                    }
-                    usnStates = newUsnState;   //更新状态
+
+                        value = f.Reason & Win32Api.USN_REASON_FILE_DELETE;
+                        if (0 != value && files.Count > 0)
+                        {
+                            if (files.ContainsKey(f.FileReferenceNumber))
+                            {
+                                files.Remove(f.FileReferenceNumber);
+                            }
+                        }
+                        usnStates = newUsnState;   //更新状态                    
                 }
             }
-
         }
 
         public void CreateFiles()
