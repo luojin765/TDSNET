@@ -65,6 +65,8 @@ namespace QueryEngine
 
     public class FileSys
     {
+        public static List<FrnFileOrigin> vlist = new List<FrnFileOrigin>();
+
         public const int SPLITFILENUMBER =100000;
         public DriveInfo driveInfo;
         public NtfsUsnJournal ntfsUsnJournal;
@@ -76,46 +78,6 @@ namespace QueryEngine
             driveInfo = dInfo;
         }
 
-        public void Split(int splitNum=-1)
-        {
-            if (splitNum < 1)
-            {
-                splitNum = (int)((double)files.Count / SPLITFILENUMBER);
-            }
-
-            if (splitNum <1)
-            {
-                splitNum = 1;
-            }
-            else if(splitNum>16)
-            {
-                splitNum = 16;
-            }
-
-            int index = -1;
-            int partNum = (int)((double)files.Count / (double)splitNum)+100;
-
-            foreach (FrnFileOrigin f in files.Values)
-            {
-                if (index < 0)
-                {
-                SplitedFiles.Add(new ArrayList(files.Count / partNum));                
-                }
-                
-
-                if (index > partNum)
-                {
-                    SplitedFiles.Last().TrimToSize();
-                    index = -1;
-                }
-                else
-                {
-                    index++;
-                }
-                SplitedFiles.Last().Add(f);
-            }
-
-        }
 
         public void Compress()
         {            
@@ -200,7 +162,7 @@ namespace QueryEngine
                                 frn.keyindex = TBS(nacn);
                                 frn.parentFrn = files[f.ParentFileReferenceNumber];
                                 files.Add(frn.fileReferenceNumber, frn);
-                            FrnFileOrigin fff= files[frn.fileReferenceNumber];
+                            vlist.Add(null);
                             }
                         }
 
