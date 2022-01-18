@@ -242,86 +242,94 @@ namespace tdsCshapu
 
             if (dri_nums > 0)
             {
-                int totalcount = 0 ;
+                int totalcount = 0;
 
                 //DateTime startTime= DateTime.Now;
 
 
                 ConcurrentDictionary<char, char> SpellDict = new ConcurrentDictionary<char, char>();
+
+
+                List<Task> tasks = new List<Task>();
+
+                foreach (FileSys fs in fileSysList)
+                {
+                    tasks.Add(new Task(() =>
+                    {
+
+                        msg = ("建立索引..(" + fs.driveInfo.Name.TrimEnd('\\').TrimEnd(':') + "盘)");
+                        label1.BeginInvoke(new StatusInfo(ShowStatuesInfo), msg);
+
+                        fs.ntfsUsnJournal = new NtfsUsnJournal(fs.driveInfo);
+
+                        fs.usnStates = new Win32Api.USN_JOURNAL_DATA();
+                        if (!fs.SaveJournalState())
+                        {
+
+                            fs.ntfsUsnJournal.CreateUsnJournal(1000 * 1024, 16 * 1024);  //尝试重建USN
+                            if (!fs.SaveJournalState())
+                            {
+                                MessageBox.Show("文件读取重建失败");
+                            }
+                        }
+                        fs.CreateFiles();
+
+                        //重整parent索引
+                        foreach (FrnFileOrigin ffull in fs.files.Values)
+                        {
+                            FrnFileOrigin f = ffull as FrnFileOrigin;
+                            if (f.additionInfo.parentFileReferenceNumber.HasValue && fs.files.ContainsKey(f.additionInfo.parentFileReferenceNumber.Value))
+                            {
+                                if (f.parentFrn == null)
+                                {
+                                    f.parentFrn = fs.files[f.additionInfo.parentFileReferenceNumber.Value];
+                                }
+                            }
+                        }
+
+
+                        Parallel.ForEach(fs.files.Values, f =>
+                        {
+                            string nacn = SpellCN.GetSpellCode(f.FileName.ToUpper(), SpellDict);
+                            f.keyindex = FileSys.TBS(nacn);
+                            if (!string.Equals(nacn, f.FileName.ToUpper()))
+                            {
+                                f.FileName = string.Intern("|" + f.FileName + "|" + nacn + "|");
+                            }
+                            else
+                            {
+                                f.FileName = string.Intern("|" + f.FileName + "|");
+                            }
+
+                        });
+
+                        Parallel.ForEach(fs.files.Values, f =>
+                        {
+                            string[] ext = getfile(f.FileName).Split('.');
+
+                            if (ext.Last().ToUpper() == "LNK")
+                            {
+                                string path = GetPath(f);
+                                if (path.IndexOf(USER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) > -1 || path.IndexOf(ALLUSER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) > -1)
+                                {
+                                    f.additionInfo.orderFirst = true;
+                                }
+                            }
+                        });                  
+
+                    fs.files = fs.files.OrderByDescending(o => o.Value.additionInfo.orderFirst).ToDictionary(p => p.Key, o => o.Value);
+                        fs.Compress();
+                        totalcount += fs.files.Count;
+                    }));
+
+                    tasks.Last().Start();
+                }
+
+                Task.WaitAll(tasks.ToArray());
+                    SpellDict = null;
+
+                    vlist = new List<FrnFileOrigin>(new FrnFileOrigin[totalcount]);
                 
-                
-
-                Parallel.ForEach(fileSysList, fs =>
-                  {
-
-                      msg = ("建立索引..(" + fs.driveInfo.Name.TrimEnd('\\').TrimEnd(':') + "盘)");
-                      label1.BeginInvoke(new StatusInfo(ShowStatuesInfo), msg);
-
-                      fs.ntfsUsnJournal = new NtfsUsnJournal(fs.driveInfo);
-
-                      fs.usnStates = new Win32Api.USN_JOURNAL_DATA();
-                      if (!fs.SaveJournalState())
-                      {
-
-                          fs.ntfsUsnJournal.CreateUsnJournal(1000 * 1024, 16 * 1024);  //尝试重建USN
-                          if (!fs.SaveJournalState())
-                          {
-                              MessageBox.Show("文件读取重建失败");
-                          }
-                      }
-                      fs.CreateFiles();
-
-                      //重整parent索引
-                      foreach (FrnFileOrigin ffull in fs.files.Values)
-                      {
-                          FrnFileOrigin f = ffull as FrnFileOrigin;
-                          if (f.additionInfo.parentFileReferenceNumber.HasValue && fs.files.ContainsKey(f.additionInfo.parentFileReferenceNumber.Value))
-                          {
-                              if (f.parentFrn == null)
-                              {
-                                  f.parentFrn = fs.files[f.additionInfo.parentFileReferenceNumber.Value];
-                              }
-                          }
-                      }
-
-
-                      Parallel.ForEach(fs.files.Values, f =>
-                      {
-                          string nacn = SpellCN.GetSpellCode(f.FileName.ToUpper(), SpellDict);
-                          f.keyindex = FileSys.TBS(nacn);
-                          if (!string.Equals(nacn, f.FileName.ToUpper()))
-                          {
-                              f.FileName =string.Intern("|" + f.FileName + "|" + nacn + "|");
-                          }
-                          else
-                          {
-                              f.FileName = string.Intern("|" + f.FileName + "|");
-                          }
-
-                      });
-
-                      Parallel.ForEach(fs.files.Values, f =>
-                      {
-                          string[] ext = getfile(f.FileName).Split('.');
-
-                          if (ext.Last().ToUpper() == "LNK")
-                          {
-                              string path = GetPath(f);
-                              if (path.IndexOf(USER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) > -1 || path.IndexOf(ALLUSER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) > -1)
-                              {
-                                  f.additionInfo.orderFirst = true;
-                              }
-                          }
-                      });
-
-
-                      fs.files = fs.files.OrderByDescending(o => o.Value.additionInfo.orderFirst).ToDictionary(p => p.Key, o => o.Value);
-                      fs.Compress();
-                      totalcount += fs.files.Count;
-                  });
-                SpellDict = null;
-
-                vlist = new List<FrnFileOrigin> (new FrnFileOrigin[totalcount]);
             }
             readsets();  //记录相关* //
 
