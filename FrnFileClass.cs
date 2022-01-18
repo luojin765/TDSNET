@@ -181,10 +181,7 @@ namespace QueryEngine
 
         public void CreateFiles()
         {
-            FileSys fs = new FileSys(this.driveInfo) ;
-            ntfsUsnJournal.GetNtfsVolumeAllentries(driveInfo.Name[0], out NtfsUsnJournal.UsnJournalReturnCode rtnCode, fs);
-            fs = null;
-            //ntfsUsnJournal.GetNtfsVolumeAllentries(driveInfo.Name[0], out NtfsUsnJournal.UsnJournalReturnCode rtnCode, this);
+            ntfsUsnJournal.GetNtfsVolumeAllentries(driveInfo.Name[0], out NtfsUsnJournal.UsnJournalReturnCode rtnCode, this);
         }
 
         const char POSITIVE = '1';

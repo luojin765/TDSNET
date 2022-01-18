@@ -414,6 +414,7 @@ namespace UsnJournal
                         }
 
                         Marshal.FreeHGlobal(pData);
+                        Marshal.FreeHGlobal(medBuffer);
                         usnRtnCode = ConvertWin32ErrorToUsnError((Win32Api.GetLastErrorEnum)Marshal.GetLastWin32Error());
                         if (usnRtnCode == UsnJournalReturnCode.ERROR_HANDLE_EOF)
                         {
