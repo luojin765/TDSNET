@@ -57,7 +57,7 @@ namespace QueryEngine
 
         public void DisposeAdditionInfo()
         {
-            additionInfo = null;
+           additionInfo = null;
         }
        
    }
@@ -80,12 +80,12 @@ namespace QueryEngine
 
 
         public void Compress()
-        {            
-            foreach(FrnFileOrigin f in files.Values)
+        {
+            foreach (FrnFileOrigin f in files.Values)
             {
                 f.DisposeAdditionInfo();
             }
-            
+
             files.TrimExcess();
         }
 
@@ -181,7 +181,10 @@ namespace QueryEngine
 
         public void CreateFiles()
         {
-            ntfsUsnJournal.GetNtfsVolumeAllentries(driveInfo.Name[0], out NtfsUsnJournal.UsnJournalReturnCode rtnCode, this);
+            FileSys fs = new FileSys(this.driveInfo) ;
+            ntfsUsnJournal.GetNtfsVolumeAllentries(driveInfo.Name[0], out NtfsUsnJournal.UsnJournalReturnCode rtnCode, fs);
+            fs = null;
+            //ntfsUsnJournal.GetNtfsVolumeAllentries(driveInfo.Name[0], out NtfsUsnJournal.UsnJournalReturnCode rtnCode, this);
         }
 
         const char POSITIVE = '1';

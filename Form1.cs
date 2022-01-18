@@ -368,19 +368,66 @@ namespace tdsCshapu
                 if (CurrentCacheItemsSource[e.ItemIndex - firstitem] != null) e.Item = CurrentCacheItemsSource[e.ItemIndex - firstitem];
 
             }
+
             if (e.Item == null)
             {
                 if ((vlist != null && vresultNum > 0 && e.ItemIndex < vresultNum && e.ItemIndex >= 0))
                 {
+
                     FrnFileOrigin f = vlist[e.ItemIndex];
                     string name = getfile(f.FileName);
                     string path2 = GetPath(f);
-
-                    if (f.IcoIndex != -1)
+                    string exten = string.Empty;
+                    try
                     {
-                        f.IcoIndex = IFileHelper.FileIconIndex(@path2);
+                        exten = Path.GetExtension(name);
                     }
-                    e.Item = GenerateListViewItem(f, name, path2);
+                    catch
+                    { }
+                    if (exten != null)
+                    {
+                       
+
+                        if (f.IcoIndex != -1)
+                        {
+                            f.IcoIndex = IFileHelper.FileIconIndex(@path2);
+                        }
+                        e.Item = GenerateListViewItem(f, name, path2);
+
+                        if (exten.Length == 0)
+                        {
+                            int ext = 3;
+
+                            f.IcoIndex = ext;
+
+                            e.Item = GenerateListViewItem(f, name, path2);
+                        }
+                        else
+                        if (exten.Equals(".exe", StringComparison.OrdinalIgnoreCase) || exten.Equals(".lnk", StringComparison.OrdinalIgnoreCase))
+                        {
+                            int ext = 0;
+                            try
+                            {
+                                ext = IFileHelper.FileIconIndex(@path2);
+                                f.IcoIndex = ext;
+                            }
+                            catch
+                            { }
+                            e.Item = GenerateListViewItem(f, name, path2);
+
+                        }
+                        else
+                        {
+                            int ext = 0;
+                            try
+                            {
+                                ext = IFileHelper.FileIconIndex(exten);//exten
+                                f.IcoIndex = ext;
+                            }
+                            catch { }
+                            e.Item = GenerateListViewItem(f, name, path2);
+                        }
+                    }                        
 
                 }
                 //}
@@ -514,7 +561,6 @@ namespace tdsCshapu
 
                 try
                 {
-
                     if (DoUSNupdate)
                     {
                         for (int i = 0; i < fileSysList.Count; i++)
@@ -603,6 +649,7 @@ namespace tdsCshapu
 
                                 resultNum++;                                
                                 vlist[resultNum - 1] = f;
+                                                                
 
                                 if (findmax != 0 && resultNum > findmax && isAll == false) break;
 
