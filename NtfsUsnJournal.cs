@@ -413,8 +413,8 @@ namespace UsnJournal
                             Marshal.WriteInt64(medBuffer, Marshal.ReadInt64(pData, 0));
                         }
 
-                        Marshal.FreeHGlobal(pData);
                         Marshal.FreeHGlobal(medBuffer);
+                        Marshal.FreeHGlobal(pData);
                         usnRtnCode = ConvertWin32ErrorToUsnError((Win32Api.GetLastErrorEnum)Marshal.GetLastWin32Error());
                         if (usnRtnCode == UsnJournalReturnCode.ERROR_HANDLE_EOF)
                         {
