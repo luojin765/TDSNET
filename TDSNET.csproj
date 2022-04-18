@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <Platforms>AnyCPU;x86;x64</Platforms>
     <StartupObject>tdsCshapu.Program</StartupObject>
@@ -11,6 +11,8 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>    
   <ServerGarbageCollection>false</ServerGarbageCollection>
   <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+	  <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
+	  <IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -25,5 +27,4 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
-
 </Project>

@@ -586,7 +586,7 @@ namespace tdsCshapu
                     }
 
 
-                    if (Threadrest) { goto Restart; }
+                   
 
 
                     for (int d = 0; d < fileSysList.Count; d++)
@@ -615,9 +615,13 @@ namespace tdsCshapu
                             }
                         }
 
-                                               
+                        
+                        if (Threadrest) { break; } //终止标签
+
                         foreach (FrnFileOrigin f in fs.files.Values)
                         {
+
+                            if (Threadrest) { break; } //终止标签
 
                             bool Finded = true;
 
@@ -681,25 +685,23 @@ namespace tdsCshapu
 
 
 
-                if (Threadrest) { goto Restart; }
-
-
-                if (resultNum > 0)
+                if (!Threadrest)
                 {
-                    vresultNum = resultNum;
-                   
-                refcache = true;
-                  istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步
-
-                }
-                else
-                {
-                   istView1.BeginInvoke(new System.EventHandler(listupdate), 0);  //异步BeginInvoke
-                }
 
 
-            Restart:;
-              
+                    if (resultNum > 0)
+                    {
+                        vresultNum = resultNum;
+
+                        refcache = true;
+                        istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步
+
+                    }
+                    else
+                    {
+                        istView1.BeginInvoke(new System.EventHandler(listupdate), 0);  //异步BeginInvoke
+                    }
+                }              
             }
         }
 
@@ -848,6 +850,10 @@ namespace tdsCshapu
             }
         }
 
+        /// <summary>
+        /// 访问list中文档
+        /// </summary>
+        /// <param name="index"></param>
         private void Golistview(int index)
         {
 
