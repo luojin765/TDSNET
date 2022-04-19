@@ -107,19 +107,23 @@ namespace QueryEngine
             return false;
         }
 
+        /// <summary>
+        /// 掩码
+        /// </summary>
+        uint reasonMask = Win32Api.USN_REASON_FILE_CREATE | Win32Api.USN_REASON_FILE_DELETE | Win32Api.USN_REASON_RENAME_NEW_NAME;
+
         public void DoWhileFileChanges()  //筛选USN状态改变
         {
             if (usnStates.UsnJournalID != 0)
             {
 
-                uint reasonMask = Win32Api.USN_REASON_FILE_CREATE | Win32Api.USN_REASON_FILE_DELETE | Win32Api.USN_REASON_RENAME_NEW_NAME;
-                _ = ntfsUsnJournal.GetUsnJournalEntries(usnStates, reasonMask, out List<Win32Api.UsnEntry> usnEntries, out Win32Api.USN_JOURNAL_DATA newUsnState);
-
-
-                foreach (Win32Api.UsnEntry f in usnEntries)
+               
+             _ = ntfsUsnJournal.GetUsnJournalEntries(usnStates, reasonMask, out List<Win32Api.UsnEntry> usnEntries, out Win32Api.USN_JOURNAL_DATA newUsnState);
+ 
+                for(int i = 0; i < usnEntries.Count; i++)               
                 {
-                    uint value;
-                    value = f.Reason & Win32Api.USN_REASON_RENAME_NEW_NAME;
+                    var f = usnEntries[i];
+                    uint value= f.Reason & Win32Api.USN_REASON_RENAME_NEW_NAME;
                                        
                         if (0 != value && files.Count > 0)
                         {

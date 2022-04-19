@@ -492,7 +492,8 @@ namespace tdsCshapu
 
             while (Threadrunning == true)
             {
-               
+
+                
                 string[] dwords = null;
                 string[] words;
                 int dlen = 0;
@@ -507,26 +508,26 @@ namespace tdsCshapu
 
                 if (IFShowR == true) { this.BeginInvoke(new EnableTxt(ShowRecord)); continue; }
 
-
+                string threadKeyword = keyword;
 
                 string[] driverNames = null;
-                if (keyword.Contains(":"))
+                if (threadKeyword.Contains(":"))
                 {
-                    driverNames = (keyword.Split(':'))[0].Split(',');
-                    keyword = (keyword.Split(':'))[1];
+                    driverNames = (threadKeyword.Split(':'))[0].Split(',');
+                    threadKeyword = (threadKeyword.Split(':'))[1];
                 }
 
-                keyword = keyword.ToUpper().Replace("  ", " ").Replace("  ", " ");
+                threadKeyword = threadKeyword.ToUpper().Replace("  ", " ").Replace("  ", " ");
                 isAll = false;
 
 
 
-                if (keyword.Contains(" /A")) { keyword = keyword.Replace(" /A", ""); isAll = true; }
+                if (threadKeyword.Contains(" /A")) { threadKeyword = threadKeyword.Replace(" /A", ""); isAll = true; }
 
-                if (keyword.Contains("\\"))
+                if (threadKeyword.Contains("\\"))
                 {
 
-                    string[] tmp = keyword.Split('\\');
+                    string[] tmp = threadKeyword.Split('\\');
                     string tmpdword = tmp[0].Replace(" ", " ");
                     string tmpword = tmp[1].Replace(" ", " ");
 
@@ -560,8 +561,8 @@ namespace tdsCshapu
                 }
                 else
                 {
-                    words = keyword.Split(' ');
-                    string tmpword = keyword.Replace(" ", "");
+                    words = threadKeyword.Split(' ');
+                    string tmpword = threadKeyword.Replace(" ", "");
                     len = tmpword.Length;
                     uniwords = FileSys.TBS(SpellCN.GetSpellCode(tmpword));
 
@@ -591,6 +592,7 @@ namespace tdsCshapu
 
                     for (int d = 0; d < fileSysList.Count; d++)
                     {
+                        if (Threadrest) { break; } //终止标签
 
                         var fs = fileSysList[d];
                         var l = fs.files;                        
@@ -616,7 +618,6 @@ namespace tdsCshapu
                         }
 
                         
-                        if (Threadrest) { break; } //终止标签
 
                         foreach (FrnFileOrigin f in fs.files.Values)
                         {
@@ -628,8 +629,10 @@ namespace tdsCshapu
                             if (DoDirectory)
                             {
 
-                                if (f.parentFrn != null && l.TryGetValue(f.parentFrn.fileReferenceNumber, out FrnFileOrigin dictmp))
+                                if (f.parentFrn != null && l.ContainsKey(f.parentFrn.fileReferenceNumber))
                                 {
+                                    FrnFileOrigin dictmp = l[f.fileReferenceNumber];
+
                                     foreach (string key in dwords)
                                     {
                                         if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.FileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) < 0))
@@ -665,12 +668,13 @@ namespace tdsCshapu
 
                                 if (findmax != 0 && resultNum > findmax && isAll == false) break;
 
-                                //if (resultNum == 200)//提前显示
-                                //{
-                                //    vresultNum = resultNum;
-                                //    istView1.BeginInvoke(new System.EventHandler(listupdate_Cache), vresultNum);  //异步BeginInvoke
-                                //    refcache = true;
-                                //}
+                                if (resultNum == 200)//提前显示
+                                {                                  
+                                        vresultNum = resultNum;
+
+                                        refcache = true;
+                                        istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步                                  
+                                }
                             }
                         }
 
@@ -680,14 +684,13 @@ namespace tdsCshapu
                 }
                 catch (Exception ex)
                 {
-                    Log_write(ex.Message);
+                    Log_write("L683"+ex.Message+";"+ex.StackTrace);
                 }
 
 
 
                 if (!Threadrest)
                 {
-
 
                     if (resultNum > 0)
                     {
@@ -2302,7 +2305,7 @@ namespace tdsCshapu
 
             usnJournalThread = new Thread(ListFilesThreadStart)
             {
-                IsBackground = true
+                IsBackground = false,
             };
             usnJournalThread.Start();
 
