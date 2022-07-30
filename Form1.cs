@@ -511,6 +511,7 @@ namespace tdsCshapu
                 string threadKeyword = keyword;
 
                 string[] driverNames = null;
+
                 if (threadKeyword.Contains(":"))
                 {
                     driverNames = (threadKeyword.Split(':'))[0].Split(',');
