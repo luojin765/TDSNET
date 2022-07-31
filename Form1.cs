@@ -1114,7 +1114,8 @@ namespace tdsCshapu
                                         break;
                                     }
 
-                                    if (Path.GetExtension(getfile(f.FileName)).Length == 0)
+                                    var ext = Path.GetExtension(getfile(f.FileName));
+                                    if (ext?.Length == 0)
                                     {
                                         if (Directory.Exists(path))
                                         {
@@ -1160,7 +1161,17 @@ namespace tdsCshapu
                                             {
                                                 try
                                                 {
+                                                    if (ext.Equals(".exe", StringComparison.OrdinalIgnoreCase))
+                                                    {
+                                                        Process p = new System.Diagnostics.Process();
+                                                        p.StartInfo.WorkingDirectory=Path.GetDirectoryName(path);
+                                                        p.StartInfo.FileName=path;
+                                                        p.Start();
+                                                    }
+                                                    else
+                                                    {
                                                     Process.Start("explorer.exe", path);
+                                                    }
 
                                                 }
                                                 catch (Exception ex)

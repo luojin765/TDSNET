@@ -13,6 +13,8 @@
   <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
 	  <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
 	  <IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
+	  <ErrorReport>none</ErrorReport>
+	  <Product>TDS 2.0.7.30</Product>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
