@@ -622,10 +622,8 @@ namespace tdsCshapu
                             if (DoDirectory)
                             {
 
-                                if (f.parentFrn != null && l.ContainsKey(f.parentFrn.fileReferenceNumber))
+                                if (f.parentFrn != null && l.TryGetValue(f.parentFrn.fileReferenceNumber, out FrnFileOrigin dictmp))
                                 {
-                                    FrnFileOrigin dictmp = l[f.fileReferenceNumber];
-
                                     foreach (string key in dwords)
                                     {
                                         if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.FileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) < 0))
