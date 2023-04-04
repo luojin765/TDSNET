@@ -5,6 +5,7 @@ using Microsoft.Win32;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using System.IO;
 
 namespace tdsCshapu
 {
@@ -59,20 +60,45 @@ namespace tdsCshapu
 
         }
 
-        [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
+        static Dictionary<string, int> iconCache = new Dictionary<string, int>();
+
         static public int FileIconIndex(string AFileName)
         {
-            try
-            {
-                SHFILEINFO vFileInfo = new SHFILEINFO();
-               IntPtr pSH= SHGetFileInfo(AFileName, 0, ref vFileInfo,
-                Marshal.SizeOf(vFileInfo), SHGFI_SYSICONINDEX | SHGFI_USEFILEATTRIBUTES);
-              
-                return vFileInfo.iIcon;
-            }
-            catch
+            string exten = Path.GetExtension(AFileName);
+            if (string.IsNullOrWhiteSpace(exten) || string.IsNullOrWhiteSpace(AFileName))
             {
                 return 0;
+            }
+
+
+            if (iconCache.TryGetValue(exten,out int index))
+            {
+                return index;
+            }
+            else 
+            {
+                try
+                {
+                    SHFILEINFO vFileInfo = new SHFILEINFO();
+                    IntPtr pSH = SHGetFileInfo(AFileName, 0, ref vFileInfo,
+                    Marshal.SizeOf(vFileInfo), SHGFI_SYSICONINDEX | SHGFI_USEFILEATTRIBUTES);
+                    if (pSH != IntPtr.Zero)
+                    {
+                        if(exten != ".exe" && exten != ".lnk")
+                        {
+                            iconCache.Add(exten, vFileInfo.iIcon);
+                        }
+                        return vFileInfo.iIcon;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                }
+                catch
+                {
+                    return 0;
+                }
             }
         }
 

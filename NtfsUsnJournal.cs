@@ -371,10 +371,10 @@ namespace UsnJournal
                         //
                         // set up the data buffer which receives the USN_Record data
                         //
-                        int pDataSize = sizeof(UInt64) + 10000;
+                        int pDataSize = sizeof(UInt64) * 10000;
                         IntPtr pData = Marshal.AllocHGlobal(pDataSize);
                         Win32Api.RtlZeroMemory(pData, pDataSize);
-
+                        uint outBytesReturned;
                         //
                         // Gather up volume's directories
                         //
@@ -386,7 +386,7 @@ namespace UsnJournal
                             sizeMftEnumData,
                             pData,
                             pDataSize,
-                            out uint outBytesReturned,
+                            out outBytesReturned,
                             IntPtr.Zero))
                         {
                             IntPtr pUsnRecord = new IntPtr(pData.ToInt64() + sizeof(Int64));
@@ -403,8 +403,7 @@ namespace UsnJournal
                                 }
 
                                 FrnFileOrigin f = FrnFileOrigin.Create(usnEntry.Name, volname, usnEntry.FileReferenceNumber, usnEntry.ParentFileReferenceNumber);
-                                    //ddd
-                                    foldersAndFiles.Add(f.fileReferenceNumber, f);
+                                foldersAndFiles.Add(f.fileReferenceNumber, f);
 
 
                                 pUsnRecord = new IntPtr(pUsnRecord.ToInt64() + usnEntry.RecordLength);
@@ -415,6 +414,7 @@ namespace UsnJournal
 
                         Marshal.FreeHGlobal(medBuffer);
                         Marshal.FreeHGlobal(pData);
+
                         usnRtnCode = ConvertWin32ErrorToUsnError((Win32Api.GetLastErrorEnum)Marshal.GetLastWin32Error());
                         if (usnRtnCode == UsnJournalReturnCode.ERROR_HANDLE_EOF)
                         {
