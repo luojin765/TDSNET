@@ -29,6 +29,7 @@ namespace tdsCshapu
     public partial class Form1 : Form
     {
        
+        object fileLock=new object();
 
         private const int MAX_PATH = 260;
 
@@ -563,112 +564,114 @@ namespace tdsCshapu
                 {
                     if (DoUSNupdate)
                     {
-                        for (int i = 0; i < fileSysList.Count; i++)
+                        lock (fileLock)
                         {
-                            try
+                            for (int i = 0; i < fileSysList.Count; i++)
                             {
-                                fileSysList[i].DoWhileFileChanges();
-                            }
+                                try
+                                {
+                                    fileSysList[i].DoWhileFileChanges();
+                                }
 
-                            catch
-                            {
-                                continue;
+                                catch
+                                {
+                                    continue;
+                                }
                             }
                         }
                     }
 
 
 
-
-
-                    for (int d = 0; d < fileSysList.Count; d++)
+                    lock (fileLock)
                     {
-                        if (Threadrest) { goto Restart; } //终止标签
-
-                        var fs = fileSysList[d];
-                        var l = fs.files;
-
-                        if (!(l.Values.Count > 0 && Directory.Exists(fs.driveInfo.Name))) continue;
-
-                        if (driverNames != null)
+                        for (int d = 0; d < fileSysList.Count; d++)
                         {
-                            bool driverFound = false;
-                            foreach (string driverName in driverNames)
-                            {
-                                if (driverName.ToUpper() == fs.driveInfo.Name.TrimEnd('\\').Trim(':').ToUpper())
-                                {
-                                    driverFound = true;
-                                    break;
-                                }
-                            }
-
-                            if (!driverFound)
-                            {
-                                continue;
-                            }
-                        }
-
-
-
-                        foreach (FrnFileOrigin f in fs.files.Values)
-                        {
-
                             if (Threadrest) { goto Restart; } //终止标签
 
-                            bool Finded = true;
+                            var fs = fileSysList[d];
+                            var l = fs.files;
 
-                            if (DoDirectory)
+                            if (!(l.Values.Count > 0 && Directory.Exists(fs.driveInfo.Name))) continue;
+
+                            if (driverNames != null)
                             {
-
-                                if (f.parentFrn != null && l.TryGetValue(f.parentFrn.fileReferenceNumber, out FrnFileOrigin dictmp))
+                                bool driverFound = false;
+                                foreach (string driverName in driverNames)
                                 {
-                                    foreach (string key in dwords)
+                                    if (driverName.ToUpper() == fs.driveInfo.Name.TrimEnd('\\').Trim(':').ToUpper())
                                     {
-                                        if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.FileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) < 0))
-                                        {
-                                            Finded = false;
-                                            break;
-                                        }
+                                        driverFound = true;
+                                        break;
                                     }
                                 }
-                                else
+
+                                if (!driverFound)
                                 {
-                                    Finded = false;
+                                    continue;
                                 }
                             }
 
-                            if (!Finded) { continue; }
-
-                            foreach (string key in words)
-                            {
-                                if (((uniwords | f.keyindex) != f.keyindex) || (f.FileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) < 0))
-                                {
-                                    Finded = false;
-                                    break;
-                                }
-                            }
-
-                            if (Finded)
+                            foreach (FrnFileOrigin f in fs.files.Values)
                             {
 
-                                resultNum++;
-                                vlist[resultNum - 1] = f;
+                                if (Threadrest) { goto Restart; } //终止标签
 
+                                bool Finded = true;
 
-                                if (findmax != 0 && resultNum > findmax && isAll == false)  break;
-
-                                if (resultNum == 200)//提前显示
+                                if (DoDirectory)
                                 {
-                                    vresultNum = resultNum;
 
-                                    refcache = true;
-                                    istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步                                  
+                                    if (f.parentFrn != null && l.TryGetValue(f.parentFrn.fileReferenceNumber, out FrnFileOrigin dictmp))
+                                    {
+                                        foreach (string key in dwords)
+                                        {
+                                            if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.FileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) < 0))
+                                            {
+                                                Finded = false;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Finded = false;
+                                    }
+                                }
+
+                                if (!Finded) { continue; }
+
+                                foreach (string key in words)
+                                {
+                                    if (((uniwords | f.keyindex) != f.keyindex) || (f.FileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) < 0))
+                                    {
+                                        Finded = false;
+                                        break;
+                                    }
+                                }
+
+                                if (Finded)
+                                {
+
+                                    resultNum++;
+                                    vlist[resultNum - 1] = f;
+
+
+                                    if (findmax != 0 && resultNum > findmax && isAll == false) break;
+
+                                    if (resultNum == 200)//提前显示
+                                    {
+                                        vresultNum = resultNum;
+
+                                        refcache = true;
+                                        istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步                                  
+                                    }
                                 }
                             }
-                        }
 
 
-                    }//foreach
+                        }//foreach
+                    }
 
                 }
                 catch (Exception ex)
