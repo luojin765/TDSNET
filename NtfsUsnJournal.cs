@@ -403,8 +403,7 @@ namespace UsnJournal
                                 }
 
                                 FrnFileOrigin f = FrnFileOrigin.Create(usnEntry.Name, volname, usnEntry.FileReferenceNumber, usnEntry.ParentFileReferenceNumber);
-                                    //ddd
-                                    foldersAndFiles.Add(f.fileReferenceNumber, f);
+                                foldersAndFiles.Add(f.fileReferenceNumber, f);
 
 
                                 pUsnRecord = new IntPtr(pUsnRecord.ToInt64() + usnEntry.RecordLength);
