@@ -8,14 +8,15 @@
     <StartupObject>tdsCshapu.Program</StartupObject>
     <ApplicationIcon>tds32-32.ico</ApplicationIcon>
     <Authors>TDSNETLuojin</Authors>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>    
+    <!--<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>    
   <ServerGarbageCollection>false</ServerGarbageCollection>
-  <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+  <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>-->
 	  <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
-	  <IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
+	  <!--<IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>-->
 	  <ErrorReport>none</ErrorReport>
-	  <Product>TDS 2.0.7.30</Product>
+	  <Product>TDS 2.0.7.31</Product>
 	  <PlatformTarget>x64</PlatformTarget>
+	  <TieredPGO>true</TieredPGO>
 	  <Nullable>enable</Nullable>
   </PropertyGroup>
 

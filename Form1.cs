@@ -291,9 +291,9 @@ namespace tdsCshapu
 
                         Parallel.ForEach(fs.files.Values, f =>
                         {
-                            string nacn = SpellCN.GetSpellCode(f.FileName, SpellDict);
+                            string nacn = SpellCN.GetSpellCode(f.fileName, SpellDict);
                             f.keyindex = FileSys.TBS(nacn);
-                            if (!string.Equals(nacn, f.fileName.ToUpper()))
+                            if (!string.Equals(nacn, f.fileName,StringComparison.OrdinalIgnoreCase))
                             {
                                 f.fileName = string.Intern(string.Concat("|",f.fileName,"|",nacn,"|"));
                             }
@@ -306,12 +306,12 @@ namespace tdsCshapu
 
                         Parallel.ForEach(fs.files.Values, f =>
                         {
-                            string[] ext = getfile(f.FileName).Split('.');
+                            string ext =Path.GetExtension(getfile(f.fileName)).ToUpper();
 
-                            if (ext.Last().ToUpper() == "LNK")
+                            if (ext == ".LNK")
                             {
                                 string path = GetPath(f);
-                                if (path.IndexOf(USER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) > -1 || path.IndexOf(ALLUSER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) > -1)
+                                if (path.IndexOf(USER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) != -1 || path.IndexOf(ALLUSER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) != -1)
                                 {
                                     f.additionInfo.orderFirst = true;
                                 }
@@ -612,11 +612,12 @@ namespace tdsCshapu
 
                             object listLock = new();
 
+
                             
-                            Parallel.ForEach(fs.files.Values, f =>
+                            foreach (FrnFileOrigin f in fs.files.Values)
                             {
 
-                                if (Threadrest) { return; } //终止标签
+                                if (Threadrest) { goto Restart; } //终止标签
 
                                 bool Finded = true;
 
@@ -627,7 +628,7 @@ namespace tdsCshapu
                                     {
                                         foreach (string key in dwords)
                                         {
-                                            if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.FileName.IndexOf(key.AsSpan(), StringComparison.OrdinalIgnoreCase) < 0))
+                                            if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.fileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) ==-1))
                                             {
                                                 Finded = false;
                                                 break;
@@ -640,11 +641,11 @@ namespace tdsCshapu
                                     }
                                 }
 
-                                if (!Finded) { return; }
+                                if (!Finded) { continue; }
 
                                 foreach (string key in words)
                                 {
-                                    if (((uniwords | f.keyindex) != f.keyindex) || (f.FileName.IndexOf(key.AsSpan(), StringComparison.OrdinalIgnoreCase) < 0))
+                                    if (((uniwords | f.keyindex) != f.keyindex) || (f.fileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) ==-1))
                                     {
                                         Finded = false;
                                         break;
@@ -653,83 +654,25 @@ namespace tdsCshapu
 
                                 if (Finded)
                                 {
-                                    lock (listLock)
-                                    {
-                                        resultNum++;
-                                    }
+
+                                    resultNum++;
                                     vlist[resultNum - 1] = f;
 
 
-                                        if (findmax != 0 && resultNum > findmax && isAll == false) return;
+                                    if (findmax != 0 && resultNum > findmax && isAll == false) break;
 
-                                        if (resultNum == 200)//提前显示
-                                        {
-                                            vresultNum = resultNum;
+                                    if (resultNum == 200)//提前显示
+                                    {
+                                        vresultNum = resultNum;
 
-                                            refcache = true;
-                                            istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步                                  
-                                        }
+                                        refcache = true;
+                                        istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步                                  
+                                    }
                                 }
-                            });
-                            //    foreach (FrnFileOrigin f in fs.files.Values)
-                            //{
-
-                            //    if (Threadrest) { goto Restart; } //终止标签
-
-                            //    bool Finded = true;
-
-                            //    if (DoDirectory)
-                            //    {
-
-                            //        if (f.parentFrn != null && l.TryGetValue(f.parentFrn.fileReferenceNumber, out FrnFileOrigin dictmp))
-                            //        {
-                            //            foreach (string key in dwords)
-                            //            {
-                            //                if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.FileName.IndexOf(key.AsSpan(), StringComparison.OrdinalIgnoreCase) < 0))
-                            //                {
-                            //                    Finded = false;
-                            //                    break;
-                            //                }
-                            //            }
-                            //        }
-                            //        else
-                            //        {
-                            //            Finded = false;
-                            //        }
-                            //    }
-
-                            //    if (!Finded) { continue; }
-
-                            //    foreach (string key in words)
-                            //    {
-                            //        if (((uniwords | f.keyindex) != f.keyindex) || (f.FileName.IndexOf(key.AsSpan(), StringComparison.OrdinalIgnoreCase) < 0))
-                            //        {
-                            //            Finded = false;
-                            //            break;
-                            //        }
-                            //    }
-
-                            //    if (Finded)
-                            //    {
-
-                            //        resultNum++;
-                            //        vlist[resultNum - 1] = f;
+                            }
 
 
-                            //        if (findmax != 0 && resultNum > findmax && isAll == false) break;
-
-                            //        if (resultNum == 200)//提前显示
-                            //        {
-                            //            vresultNum = resultNum;
-
-                            //            refcache = true;
-                            //            istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步                                  
-                            //        }
-                            //    }
-                            //}
-
-
-                        }//foreach
+                        }
                     }
 
                 }
@@ -911,7 +854,7 @@ namespace tdsCshapu
 
                                     foreach (string key in dwords)
                                     {
-                                        if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.FileName.IndexOf(key.AsSpan(), StringComparison.OrdinalIgnoreCase) < 0))
+                                        if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.fileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) == -1))
                                         {
                                             Finded = false;
                                             break;
@@ -928,7 +871,7 @@ namespace tdsCshapu
 
                             foreach (string key in words)
                             {
-                                if (((uniwords | f.keyindex) != f.keyindex) || (f.FileName.IndexOf(key.AsSpan(), StringComparison.OrdinalIgnoreCase) < 0))
+                                if (((uniwords | f.keyindex) != f.keyindex) || (f.fileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) == -1))
                                 {
                                     Finded = false;
                                     break;
@@ -1671,7 +1614,7 @@ namespace tdsCshapu
                     string fp = GetPath(f);
                     if (File.Exists(fp) || Directory.Exists(fp))
                     {
-                        fs.WriteLine(f.fileReferenceNumber.ToString() + "@" + f.parentFrn.fileReferenceNumber.ToString() + "@" + f.fileName + "@" + 0 + "@" + f.VolumeName);
+                        fs.WriteLine(string.Concat(f.fileReferenceNumber,"@",f.parentFrn.fileReferenceNumber,"@",f.fileName,"@",0,"@",f.VolumeName));
                     }
                 }
                 fs.Close();
@@ -2514,10 +2457,24 @@ namespace tdsCshapu
         /// <param name="txt"></param>
         /// <returns></returns>
         public static string getfile(ReadOnlySpan<char> filename)
-        {            
-            if (filename.Length > 0) { string[] fn = filename.ToString().Split('|'); if (fn.GetUpperBound(0) > 0) { return fn[1]; } }
+        {
+            var index1 = filename.IndexOf('|');
+            if (index1 < 0) return string.Empty;
+            var filename2=filename.Slice(index1 + 1, filename.Length - index1-1);
 
-            return string.Empty;
+            var index2 = filename2.IndexOf('|');
+            if (index1 < 0)
+            {
+                return filename2.ToString();
+            }
+            else
+            {
+                return filename2.Slice(0, index2).ToString();
+            }
+
+            //if (filename.Length > 0) { string[] fn = filename.ToString().Split('|'); if (fn.GetUpperBound(0) > 0) { return fn[1]; } }
+
+            
         }
 
 

@@ -59,7 +59,6 @@ namespace QueryEngine
         public char VolumeName; //根目录名称
 
         public string fileName = "";
-        public ReadOnlySpan<char> FileName => fileName.AsSpan();
 
         public UInt64 fileReferenceNumber;
 
