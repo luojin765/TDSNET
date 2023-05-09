@@ -175,7 +175,7 @@ namespace tdsCshapu
 
         static string GetPath(FrnFileOrigin f)
         {
-            string path = MyFunctions.GetPathStr(f);
+            string path = MyFunctions.GetPathStr(f).ToString();
             if (path.EndsWith(':'))
             {
                 return path + "\\";
@@ -611,6 +611,8 @@ namespace tdsCshapu
                             }
 
                             object listLock = new();
+
+                            
                             Parallel.ForEach(fs.files.Values, f =>
                             {
 
