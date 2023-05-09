@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,7 +7,7 @@ namespace CNChar
 {
     class SpellCN
     {
-        public static string GetSpellCodeWithBuffer(string CnStr,  ConcurrentDictionary<char,char> SpellDict)
+        public static string GetSpellCodeWithBuffer(ReadOnlySpan<char> CnStr,  ConcurrentDictionary<char,char> SpellDict)
         {
             StringBuilder strTemp = new StringBuilder(256);
 
@@ -17,7 +18,7 @@ namespace CNChar
 
             for (i = 0; i <= iLen - 1; i++)
             {
-                char c= CnStr[i];
+                char c= char.ToUpper(CnStr[i]);
 
                 if (!SpellDict.ContainsKey(c))
                 {
@@ -32,7 +33,7 @@ namespace CNChar
             return strTemp.ToString();
         }
 
-        public static string GetSpellCode(string CnStr, ConcurrentDictionary<char, char> SpellDict = null)
+        public static string GetSpellCode(ReadOnlySpan<char> CnStr, ConcurrentDictionary<char, char> SpellDict = null)
         {
             if(SpellDict==null)
             {
@@ -45,7 +46,7 @@ namespace CNChar
         }
 
 
-        public static string GetSpellCodeWithOutBuffer(string CnStr)
+        public static string GetSpellCodeWithOutBuffer(ReadOnlySpan<char> CnStr)
         {
             StringBuilder strTemp = new StringBuilder(256);
 
@@ -57,7 +58,7 @@ namespace CNChar
             for (i = 0; i <= iLen - 1; i++)
             {
 
-                    strTemp.Append(GetCharSpellCode(CnStr[i]));
+                strTemp.Append(GetCharSpellCode(char.ToUpper(CnStr[i])));
             }
             return strTemp.ToString();
         }

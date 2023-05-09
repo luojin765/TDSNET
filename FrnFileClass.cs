@@ -26,7 +26,8 @@ namespace QueryEngine
     public class FrnFileOrigin
     {
         public char VolumeName; //根目录名称
-        public string FileName = "";
+        public string fileName = "";
+        public ReadOnlySpan<char> FileName => fileName.AsSpan();
 
         public UInt64 fileReferenceNumber;
 
@@ -48,7 +49,7 @@ namespace QueryEngine
 
         private FrnFileOrigin(string filename,char vol,ulong fileRefNum)
         {            
-            FileName = string.Intern(filename);
+            fileName = string.Intern(filename);
             VolumeName = vol;
             fileReferenceNumber = fileRefNum;
         }
@@ -129,16 +130,16 @@ namespace QueryEngine
                         {
                             if (files.ContainsKey(f.FileReferenceNumber) && files.ContainsKey(f.ParentFileReferenceNumber))
                             {
-                                string nacn = SpellCN.GetSpellCode(f.Name.ToUpper());
+                                string nacn = SpellCN.GetSpellCode(f.Name.AsSpan());
                                 FrnFileOrigin frn = files[f.FileReferenceNumber];
-                                frn.keyindex = TBS(nacn);
+                                frn.keyindex = TBS(nacn.AsSpan());
                                 if (!string.Equals(nacn, f.Name.ToUpper()))
                                 {
-                                    frn.FileName = "|" + f.Name + "|" + nacn + "|";
+                                    frn.fileName = "|" + f.Name + "|" + nacn + "|";
                                 }
                                 else
                                 {
-                                    frn.FileName = "|" + f.Name + "|";
+                                    frn.fileName = "|" + f.Name + "|";
                                 }
                                 frn.parentFrn = files[f.ParentFileReferenceNumber];
                                 files[f.FileReferenceNumber] = frn;
@@ -151,7 +152,7 @@ namespace QueryEngine
                         {
                             if (!files.ContainsKey(f.FileReferenceNumber) && !string.IsNullOrWhiteSpace(f.Name) && files.ContainsKey(f.ParentFileReferenceNumber))
                             {
-                                string nacn = SpellCN.GetSpellCode(f.Name.ToUpper());
+                                string nacn = SpellCN.GetSpellCode(f.Name.AsSpan());
                                 string name;
                                 if (!string.Equals(nacn, f.Name.ToUpper()))
                                 {
@@ -163,7 +164,7 @@ namespace QueryEngine
                                 }
 
                                 FrnFileOrigin frn = FrnFileOrigin.Create(name, driveInfo.Name[0], f.FileReferenceNumber, f.ParentFileReferenceNumber);
-                                frn.keyindex = TBS(nacn);
+                                frn.keyindex = TBS(nacn.AsSpan());
                                 frn.parentFrn = files[f.ParentFileReferenceNumber];
                                 files.Add(frn.fileReferenceNumber, frn);
                             vlist.Add(null);
@@ -196,7 +197,7 @@ namespace QueryEngine
 
        static readonly char[] alphbet = { '@', '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '-', '_', '[', ']', '(', ')', '/' };
 
-        public static UInt64 TBS(string txt)
+        public static UInt64 TBS(ReadOnlySpan<char> txt)
         {
             char[] alph = new char[SCREENCHARNUM];
 
