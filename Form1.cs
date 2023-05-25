@@ -1,5 +1,6 @@
 ﻿using CNChar;
 using DoActions;
+using FileContentSearch;
 using Microsoft.Win32;
 using PInvoke;
 using QueryEngine;
@@ -28,8 +29,9 @@ namespace tdsCshapu
 {
     public partial class Form1 : Form
     {
-       
-        object fileLock=new object();
+        static ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = 3 };
+
+        object fileLock =new object();
 
         private const int MAX_PATH = 260;
 
@@ -289,7 +291,7 @@ namespace tdsCshapu
                         }
 
 
-                        Parallel.ForEach(fs.files.Values, f =>
+                        Parallel.ForEach(fs.files.Values, parallelOptions, f =>
                         {
                             string nacn = SpellCN.GetSpellCode(f.fileName, SpellDict);
                             f.keyindex = FileSys.TBS(nacn);
@@ -304,7 +306,7 @@ namespace tdsCshapu
 
                         });
 
-                        Parallel.ForEach(fs.files.Values, f =>
+                        Parallel.ForEach(fs.files.Values, parallelOptions, f =>
                         {
                             string ext =Path.GetExtension(getfile(f.fileName)).ToUpper();
 
@@ -1253,6 +1255,18 @@ namespace tdsCshapu
             }
         }
 
+
+        public static void ClearMemory()
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle, -1, -1);
+            }
+        }
+
+      
         private void Keywords_KeyDown(object sender, KeyEventArgs e)
         {
 
@@ -1269,8 +1283,17 @@ namespace tdsCshapu
                     {
                         string tmp = Keywords.Text.Trim();
 
+                        if (tmp.ToUpper() =="FF")
+                        {
+                            CSYDFile csyd = new CSYDFile();
+                            csyd.ShowDialog();
+                            csyd = null;
+                            ClearMemory();
+                            return;
+                        }
 
-                        try
+
+                            try
                         {
 
                             System.Diagnostics.Process.Start(tmp);

@@ -7,7 +7,9 @@
     <Platforms>AnyCPU;x86;x64</Platforms>
     <StartupObject>tdsCshapu.Program</StartupObject>
     <ApplicationIcon>tds32-32.ico</ApplicationIcon>
-    <Authors>TDSNETLuojin</Authors>
+	  <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+	  <TieredPGO>true</TieredPGO>
+	  <Authors>TDSNETLuojin</Authors>
     <!--<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>    
   <ServerGarbageCollection>false</ServerGarbageCollection>
   <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>-->
@@ -52,4 +54,8 @@
     <DebugType>full</DebugType>
     <Optimize>False</Optimize>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\MyOffice\FileContent\FileContentSearch\FileContentSearch.csproj" />
+  </ItemGroup>
 </Project>
