@@ -29,7 +29,8 @@ namespace tdsCshapu
 {
     public partial class Form1 : Form
     {
-        static ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = 3 };
+        static ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = 4 };
+        static ParallelOptions parallelOptionsTwo = new ParallelOptions() { MaxDegreeOfParallelism = 2 };
 
         object fileLock = new object();
 
@@ -291,7 +292,7 @@ namespace tdsCshapu
                         }
 
 
-                        Parallel.ForEach(fs.files.Values, parallelOptions, f =>
+                        Parallel.ForEach(fs.files.Values, parallelOptionsTwo, f =>
                         {
                             string nacn = SpellCN.GetSpellCode(f.fileName, SpellDict);
                             f.keyindex = FileSys.TBS(nacn);
@@ -482,7 +483,255 @@ namespace tdsCshapu
         }
         int vresultNum = 0;
 
+
+        private static SpinLock spinLock = new SpinLock();
+
         private void SearchFilesThreadStart()
+        {
+            Threadrunning = true;
+
+            while (Threadrunning == true)
+            {
+                string[] dwords = null;
+                string[] words;
+                int dlen = 0;
+                int len;
+                UInt64 unidwords = 0;
+                UInt64 uniwords;
+                bool DoDirectory = false;
+                int resultNum = 0;
+
+                gOs.WaitOne();
+                Threadrest = false;  //重启标签
+
+                if (IFShowR == true) { this.BeginInvoke(new EnableTxt(ShowRecord)); goto Restart; }
+
+                string threadKeyword = keyword;
+
+                string[] driverNames = null;
+
+                if (threadKeyword.Contains(":"))
+                {
+                    driverNames = (threadKeyword.Split(':'))[0].Split(',');
+                    threadKeyword = (threadKeyword.Split(':'))[1];
+                }
+
+                threadKeyword = threadKeyword.ToUpper().Replace("  ", " ").Replace("  ", " ");
+                isAll = false;
+
+
+                if (threadKeyword.Contains(" /A")) { threadKeyword = threadKeyword.Replace(" /A", ""); isAll = true; }
+
+                if (threadKeyword.Contains("\\"))
+                {
+
+                    string[] tmp = threadKeyword.Split('\\');
+                    string tmpdword = tmp[0].Replace(" ", " ");
+                    string tmpword = tmp[1].Replace(" ", " ");
+                    dlen = tmpdword.Length;
+                    len = tmpword.Length;
+                    unidwords = FileSys.TBS(SpellCN.GetSpellCode(tmpdword));
+
+                    uniwords = FileSys.TBS(SpellCN.GetSpellCode(tmpword));
+
+
+                    if (tmp[0].Contains(" "))
+                    {
+                        dwords = tmp[0].Split(' ');
+
+                    }
+                    else
+                    {
+                        dwords = new string[] { tmp[0] };
+                    }
+                    if (tmp[1].Contains(" "))
+                    {
+                        words = tmp[1].Split(' ');
+
+                    }
+                    else
+                    {
+                        words = new string[] { tmp[1] };
+                    }
+
+                    DoDirectory = true;
+                }
+                else
+                {
+                    words = threadKeyword.Split(' ');
+                    string tmpword = threadKeyword.Replace(" ", "");
+                    len = tmpword.Length;
+                    uniwords = FileSys.TBS(SpellCN.GetSpellCode(tmpword));
+                }
+
+                try
+                {
+                    if (DoUSNupdate)
+                    {
+                        lock (fileLock)
+                        {
+                            for (int i = 0; i < fileSysList.Count; i++)
+                            {
+                                try
+                                {
+                                    fileSysList[i].DoWhileFileChanges();
+                                }
+
+                                catch
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
+
+
+                    lock (fileLock)
+                    {
+                        for (int d = 0; d < fileSysList.Count; d++)
+                        {
+                            if (Threadrest) { goto Restart; } //终止标签
+
+                            var fs = fileSysList[d];
+                            var l = fs.files;
+
+                            if (!(l.Values.Count > 0 && Directory.Exists(fs.driveInfo.Name))) continue;
+
+                            if (driverNames != null)
+                            {
+                                bool driverFound = false;
+                                foreach (string driverName in driverNames)
+                                {
+                                    if (driverName.ToUpper() == fs.driveInfo.Name.TrimEnd('\\').Trim(':').ToUpper())
+                                    {
+                                        driverFound = true;
+                                        break;
+                                    }
+                                }
+
+                                if (!driverFound)
+                                {
+                                    continue;
+                                }
+                            }
+
+                            Parallel.ForEach(fs.files.Values, parallelOptions, (f, parallelState) =>
+                            {
+
+                                if (Threadrest) { parallelState.Stop(); return; } //终止标签
+
+                                bool Finded = true;
+
+                                if (DoDirectory)
+                                {
+
+                                    if (f.parentFrn != null && l.TryGetValue(f.parentFrn.fileReferenceNumber, out FrnFileOrigin dictmp))
+                                    {
+                                        foreach (string key in dwords)
+                                        {
+                                            if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.fileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) == -1))
+                                            {
+                                                Finded = false;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Finded = false;
+                                    }
+                                }
+
+                                if (Finded)
+                                {
+                                    foreach (string key in words)
+                                    {
+                                        if (((uniwords | f.keyindex) != f.keyindex) || (f.fileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) == -1))
+                                        {
+                                            Finded = false;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (Finded)
+                                {
+                                    if(!UpdateWithSpinLock(f,ref resultNum))
+                                    {
+                                        parallelState.Stop();
+                                        return;
+                                    }
+                                    
+                                }
+                            });
+
+
+                        }
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Log_write("L683" + ex.Message + ";" + ex.StackTrace);
+                }
+
+
+
+                if (!Threadrest)
+                {
+
+                    if (resultNum > 0)
+                    {
+                        vresultNum = resultNum;
+
+                        refcache = true;
+                        istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步
+
+                    }
+                    else
+                    {
+                        istView1.BeginInvoke(new System.EventHandler(listupdate), 0);  //异步BeginInvoke
+                    }
+                }
+Restart:;
+
+            }
+        }
+
+        private bool UpdateWithSpinLock(FrnFileOrigin f, ref int resultNum)
+        {
+            bool lockTaken = false;
+            try
+            {
+                spinLock.Enter(ref lockTaken);
+                resultNum++;
+                vlist[resultNum - 1] = f;
+
+
+                if (findmax != 0 && resultNum > findmax && isAll == false)
+                {
+                    return false;
+                }
+
+                if (resultNum == 200)//提前显示
+                {
+                    vresultNum = resultNum;
+                    refcache = true;
+                    istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步                                  
+                }
+
+            }
+            finally
+            {
+                if (lockTaken) spinLock.Exit(false);
+            }
+          
+            return true;
+        }
+
+
+        private void SearchFilesThreadStartST()
         {
             Threadrunning = true;
 
