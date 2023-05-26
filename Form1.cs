@@ -29,10 +29,10 @@ namespace tdsCshapu
 {
     public partial class Form1 : Form
     {
-        static ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = 4 };
-        static ParallelOptions parallelOptionsTwo = new ParallelOptions() { MaxDegreeOfParallelism = 2 };
+        static readonly ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = 4 };
+        static readonly ParallelOptions parallelOptionsTwo = new ParallelOptions() { MaxDegreeOfParallelism = 2 };
 
-        object fileLock = new object();
+        static readonly object fileLock = new object();
 
         private const int MAX_PATH = 260;
 
