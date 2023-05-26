@@ -31,7 +31,7 @@ namespace tdsCshapu
     {
         static ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = 3 };
 
-        object fileLock =new object();
+        object fileLock = new object();
 
         private const int MAX_PATH = 260;
 
@@ -61,7 +61,7 @@ namespace tdsCshapu
         static string keyword = string.Empty;
 
         static Thread GoSearch;
-       
+
         AutoResetEvent gOs = new AutoResetEvent(false);
 
         //全局化线程方便控制
@@ -72,8 +72,8 @@ namespace tdsCshapu
 
         string USER_PROGRAM_PATH = "";//获取环境目录变量USER
         string ALLUSER_PROGRAM_PATH = "";   //获取环境目录变量ALLUSER
-        List<FrnFileOrigin>  vlist = new List<FrnFileOrigin>(500);
-        
+        List<FrnFileOrigin> vlist = new List<FrnFileOrigin>(500);
+
         //listview 绑定
         List<FrnFileOrigin> Record = new List<FrnFileOrigin>() { };
 
@@ -124,9 +124,9 @@ namespace tdsCshapu
         public static Color Ldeep = Color.FromArgb(87, 97, 121);
         public static Color SHALLOW = Color.FromArgb(211, 82, 48);
         public static Color HIGHLIGHT = Color.FromArgb(233, 233, 233);
-         //筛选字符的个数
+        //筛选字符的个数
 
- //记录相关
+        //记录相关
 
 
         public static Keys HOTK_SHOW = Keys.OemPeriod;
@@ -295,20 +295,20 @@ namespace tdsCshapu
                         {
                             string nacn = SpellCN.GetSpellCode(f.fileName, SpellDict);
                             f.keyindex = FileSys.TBS(nacn);
-                            if (!string.Equals(nacn, f.fileName,StringComparison.OrdinalIgnoreCase))
+                            if (!string.Equals(nacn, f.fileName, StringComparison.OrdinalIgnoreCase))
                             {
-                                f.fileName = string.Intern(string.Concat("|",f.fileName,"|",nacn,"|"));
+                                f.fileName = string.Intern(string.Concat("|", f.fileName, "|", nacn, "|"));
                             }
                             else
                             {
-                                f.fileName = string.Intern(string.Concat("|",f.fileName,"|"));
+                                f.fileName = string.Intern(string.Concat("|", f.fileName, "|"));
                             }
 
                         });
 
                         Parallel.ForEach(fs.files.Values, parallelOptions, f =>
                         {
-                            string ext =Path.GetExtension(getfile(f.fileName)).ToUpper();
+                            string ext = Path.GetExtension(getfile(f.fileName)).ToUpper();
 
                             if (ext == ".LNK")
                             {
@@ -318,9 +318,9 @@ namespace tdsCshapu
                                     f.additionInfo.orderFirst = true;
                                 }
                             }
-                        });                  
+                        });
 
-                    fs.files = fs.files.OrderByDescending(o => o.Value.additionInfo.orderFirst).ToDictionary(p => p.Key, o => o.Value);
+                        fs.files = fs.files.OrderByDescending(o => o.Value.additionInfo.orderFirst).ToDictionary(p => p.Key, o => o.Value);
                         fs.Compress();
                         totalcount += fs.files.Count;
                     }));
@@ -329,10 +329,10 @@ namespace tdsCshapu
                 }
 
                 Task.WaitAll(tasks.ToArray());
-                    SpellDict = null;
+                SpellDict = null;
 
-                    vlist = new List<FrnFileOrigin>(new FrnFileOrigin[totalcount]);
-                
+                vlist = new List<FrnFileOrigin>(new FrnFileOrigin[totalcount]);
+
             }
             readsets();  //记录相关* //
 
@@ -436,7 +436,7 @@ namespace tdsCshapu
                             catch { }
                             e.Item = GenerateListViewItem(f, name, path2);
                         }
-                    }                        
+                    }
 
                 }
                 //}
@@ -615,7 +615,7 @@ namespace tdsCshapu
                             object listLock = new();
 
 
-                            
+
                             foreach (FrnFileOrigin f in fs.files.Values)
                             {
 
@@ -630,7 +630,7 @@ namespace tdsCshapu
                                     {
                                         foreach (string key in dwords)
                                         {
-                                            if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.fileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) ==-1))
+                                            if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.fileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) == -1))
                                             {
                                                 Finded = false;
                                                 break;
@@ -647,7 +647,7 @@ namespace tdsCshapu
 
                                 foreach (string key in words)
                                 {
-                                    if (((uniwords | f.keyindex) != f.keyindex) || (f.fileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) ==-1))
+                                    if (((uniwords | f.keyindex) != f.keyindex) || (f.fileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) == -1))
                                     {
                                         Finded = false;
                                         break;
@@ -701,12 +701,12 @@ namespace tdsCshapu
                         istView1.BeginInvoke(new System.EventHandler(listupdate), 0);  //异步BeginInvoke
                     }
                 }
-            Restart:;
+Restart:;
 
             }
         }
-        
-       
+
+
 
         private void listupdate(object o, System.EventArgs e)
         {
@@ -722,25 +722,25 @@ namespace tdsCshapu
 
 
             istView1.VirtualListSize = size;
-            
-                        
+
+
             istView1.Invalidate();  //刷新cache内核不，然不显示
-            
-            
-            
-            
-            
-            
+
+
+
+
+
+
 
             if ((findmax != 0 && size > findmax) && isAll == false)
-            { 
-                ShowStatuesInfo("搜索到" + findmax.ToString() + "+个对象"); 
+            {
+                ShowStatuesInfo("搜索到" + findmax.ToString() + "+个对象");
             }
             else
             {
                 //数量控制
                 ShowStatuesInfo("搜索到" + size.ToString() + "个对象");
-               istView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
+                istView1.AutoResizeColumns(ColumnHeaderAutoResizeStyle.ColumnContent);
             }
         }
 
@@ -947,13 +947,13 @@ namespace tdsCshapu
                                                     if (ext.Equals(".exe", StringComparison.OrdinalIgnoreCase))
                                                     {
                                                         Process p = new System.Diagnostics.Process();
-                                                        p.StartInfo.WorkingDirectory=Path.GetDirectoryName(path);
-                                                        p.StartInfo.FileName=path;
+                                                        p.StartInfo.WorkingDirectory = Path.GetDirectoryName(path);
+                                                        p.StartInfo.FileName = path;
                                                         p.Start();
                                                     }
                                                     else
                                                     {
-                                                    Process.Start("explorer.exe", path);
+                                                        Process.Start("explorer.exe", path);
                                                     }
 
                                                 }
@@ -1266,7 +1266,7 @@ namespace tdsCshapu
             }
         }
 
-      
+
         private void Keywords_KeyDown(object sender, KeyEventArgs e)
         {
 
@@ -1283,7 +1283,7 @@ namespace tdsCshapu
                     {
                         string tmp = Keywords.Text.Trim();
 
-                        if (tmp.ToUpper() =="FF")
+                        if (tmp.ToUpper() == "FF")
                         {
                             CSYDFile csyd = new CSYDFile();
                             csyd.ShowDialog();
@@ -1293,7 +1293,7 @@ namespace tdsCshapu
                         }
 
 
-                            try
+                        try
                         {
 
                             System.Diagnostics.Process.Start(tmp);
@@ -1338,14 +1338,14 @@ namespace tdsCshapu
 
 
                 vresultNum = Record.Count;
-                
-                    //this.BeginInvoke(new dosize(Sizecalc), Record.Count);
-                    for(int i = 0; i < Record.Count; i++)
-                    {
+
+                //this.BeginInvoke(new dosize(Sizecalc), Record.Count);
+                for (int i = 0; i < Record.Count; i++)
+                {
                     vlist[i] = Record[i];
-                    }
-                    this.BeginInvoke(new System.EventHandler(Recordupdate), vresultNum);  //异步invoke
-                                
+                }
+                this.BeginInvoke(new System.EventHandler(Recordupdate), vresultNum);  //异步invoke
+
 
             }
             else
@@ -1415,7 +1415,7 @@ namespace tdsCshapu
                     string fp = GetPath(f);
                     if (File.Exists(fp) || Directory.Exists(fp))
                     {
-                        fs.WriteLine(string.Concat(f.fileReferenceNumber,"@",f.parentFrn.fileReferenceNumber,"@",f.fileName,"@",0,"@",f.VolumeName));
+                        fs.WriteLine(string.Concat(f.fileReferenceNumber, "@", f.parentFrn.fileReferenceNumber, "@", f.fileName, "@", 0, "@", f.VolumeName));
                     }
                 }
                 fs.Close();
@@ -1527,8 +1527,8 @@ namespace tdsCshapu
                         prItem.BackColor = HIGHLIGHT;
                         prItem.ForeColor = Color.DimGray;
                     }
-                    catch 
-                    { 
+                    catch
+                    {
                     }
 
             }
@@ -1565,9 +1565,9 @@ namespace tdsCshapu
 
         private void About()
         {
-            string ver = "5.0924.10381";
+            string ver = "6.0010.250526";
             ifhide = false;
-            MessageBox.Show("版本号:" + ver + "\r\nLJ@Nanjing@20211210");
+            MessageBox.Show("版本号:" + ver + "\r\n罗晋@BeiJing@20230526");
         }
 
         private void 打开OToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1664,7 +1664,7 @@ namespace tdsCshapu
             {
                 调用系统菜单ToolStripMenuItem.Visible = true;
                 toolStripSeparator2.Visible = true;
-                FrnFileOrigin f =(FrnFileOrigin) vlist[istView1.SelectedIndices[0]];
+                FrnFileOrigin f = (FrnFileOrigin)vlist[istView1.SelectedIndices[0]];
                 if (!(f == null))
                 {
                     toolStripTextBox1.Text = getfile(f.fileName);
@@ -1949,11 +1949,11 @@ namespace tdsCshapu
                     string name = getfile(f.fileName);
                     string path2 = GetPath(f);
 
-                    if(i >= CurrentCacheItemsSource.Count())
+                    if (i >= CurrentCacheItemsSource.Count())
                     {
                         break;
                     }
-                    if ( f.IcoIndex != -1)
+                    if (f.IcoIndex != -1)
                     {
                         CurrentCacheItemsSource[i] = GenerateListViewItem(f, name, path2);
                     }
@@ -1996,7 +1996,7 @@ namespace tdsCshapu
                             else
                             {
                                 int ext = 0;
-                             
+
                                 try
                                 {
                                     ext = IFileHelper.FileIconIndex(exten);//exten
@@ -2261,7 +2261,7 @@ namespace tdsCshapu
         {
             var index1 = filename.IndexOf('|');
             if (index1 < 0) return string.Empty;
-            var filename2=filename.Slice(index1 + 1, filename.Length - index1-1);
+            var filename2 = filename.Slice(index1 + 1, filename.Length - index1 - 1);
 
             var index2 = filename2.IndexOf('|');
             if (index1 < 0)
@@ -2275,7 +2275,7 @@ namespace tdsCshapu
 
             //if (filename.Length > 0) { string[] fn = filename.ToString().Split('|'); if (fn.GetUpperBound(0) > 0) { return fn[1]; } }
 
-            
+
         }
 
 
@@ -2522,7 +2522,7 @@ namespace tdsCshapu
                 {
 
                 }
-                            
+
 
                 if (this.Width < 100) this.Width = 300;
                 if (this.Height < 100) this.Height = 200;
@@ -2547,19 +2547,19 @@ namespace tdsCshapu
             }
         }
 
-     
+
 
 
         #region Properties
 
-        
+
 
 
         #endregion
 
         #region private member variables
 
-        
+
 
         #endregion
 
@@ -2694,7 +2694,7 @@ namespace tdsCshapu
             {
                 try
                 {
-                   // Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                    // Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                     using (StreamReader fs = new StreamReader(path, System.Text.Encoding.GetEncoding("gb2312")))
                     {
 
@@ -2831,27 +2831,27 @@ namespace tdsCshapu
         {
             //try
             //{
-                if (i == true)
-                {
-                    Form1.Mdeep = Color.FromArgb(58, 64, 80);
-                    Form1.Hdeep = Color.FromArgb(48, 50, 63);
-                    Form1.Ldeep = Color.FromArgb(87, 97, 121);
-                    Keywords.ForeColor = Color.WhiteSmoke;
-                    istView1.ForeColor = Color.Gainsboro;
-                }
-                else
-                {
-                    Form1.Mdeep = Color.White;
-                    Form1.Hdeep = Control.DefaultBackColor;
-                    Form1.Ldeep = Color.White;
+            if (i == true)
+            {
+                Form1.Mdeep = Color.FromArgb(58, 64, 80);
+                Form1.Hdeep = Color.FromArgb(48, 50, 63);
+                Form1.Ldeep = Color.FromArgb(87, 97, 121);
+                Keywords.ForeColor = Color.WhiteSmoke;
+                istView1.ForeColor = Color.Gainsboro;
+            }
+            else
+            {
+                Form1.Mdeep = Color.White;
+                Form1.Hdeep = Control.DefaultBackColor;
+                Form1.Ldeep = Color.White;
 
-                    Keywords.ForeColor = Color.Black;
-                    istView1.ForeColor = Color.DimGray;
-                }
-                Keywords.BackColor = Ldeep;
-                istView1.BackColor = Mdeep;
-                label1.BackColor = Keywords.BackColor;
-                this.BackColor = Hdeep;
+                Keywords.ForeColor = Color.Black;
+                istView1.ForeColor = Color.DimGray;
+            }
+            Keywords.BackColor = Ldeep;
+            istView1.BackColor = Mdeep;
+            label1.BackColor = Keywords.BackColor;
+            this.BackColor = Hdeep;
             //}
             //catch(Exception ex)
             //{
@@ -2861,5 +2861,13 @@ namespace tdsCshapu
         #endregion
 
 
+        private void 文件内容查询FToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CSYDFile csyd = new CSYDFile();
+            csyd.ShowDialog();
+            csyd = null;
+            ClearMemory();
+            return;
+        }
     }
 }

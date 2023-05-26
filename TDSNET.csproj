@@ -56,6 +56,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\MyOffice\FileContent\FileContentSearch\FileContentSearch.csproj" />
+    <ProjectReference Include="..\..\FileContent\FileContentSearch\FileContentSearch.csproj" />
   </ItemGroup>
 </Project>
