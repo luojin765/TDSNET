@@ -21,6 +21,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using SystemMenu;
+using TDSNET;
 using UsnJournal;
 
 
@@ -146,8 +147,7 @@ namespace tdsCshapu
             IFileHelper.ListViewSysImages(istView1);
             SetDoubleBuffering(istView1, true);
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-
+            //挂载消息
         }
 
         //#region 获取所有用户文件夹
@@ -331,7 +331,7 @@ namespace tdsCshapu
 
                 Task.WaitAll(tasks.ToArray());
                 SpellDict = null;
-
+                
                 vlist = new List<FrnFileOrigin>(new FrnFileOrigin[totalcount]);
 
             }
@@ -2067,6 +2067,17 @@ Restart:;
         private void 刷新RToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Refreshlist();
+            string strProcessName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+            ////获取版本号 
+            //CommonData.VersionNumber = Application.ProductVersion; 
+            //检查进程是否已经启动，已经启动则显示报错信息退出程序。 
+            var p = System.Diagnostics.Process.GetProcessesByName(strProcessName);
+            if (p?.Length > 0)
+            {
+                PostThreadMessage(p[0].Threads[0].Id, 0x010, IntPtr.Zero, IntPtr.Zero);
+                Thread.Sleep(500);
+            }
+
         }
 
         private void 快捷键HToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2147,15 +2158,19 @@ Restart:;
             }
         }
 
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool PostThreadMessage(int threadId, uint msg, IntPtr wParam, IntPtr lParam);
+
         private void 快捷键说明SToolStripMenuItem_Click(object sender, EventArgs e)
         {
             help();
-
+         
         }
 
         private void 关于LToolStripMenuItem_Click(object sender, EventArgs e)
         {
             About();
+           
         }
 
         string GetDateFromPath(string path2)

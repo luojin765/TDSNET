@@ -1,19 +1,49 @@
+using DocumentFormat.OpenXml.Office2021.Excel.NamedSheetViews;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using TDSNET;
 
 namespace tdsCshapu
 {
     static class Program
     {
+
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main()
         {
+
+            bool flag = false;
+            System.Threading.Mutex hMutex = new System.Threading.Mutex(true, Application.ProductName, out flag);
+            bool b = hMutex.WaitOne(0, false);
+
+            if(!flag)
+            {
+                //获取欲启动进程名
+                string strProcessName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+                ////获取版本号 
+                //CommonData.VersionNumber = Application.ProductVersion; 
+                //检查进程是否已经启动，已经启动则显示报错信息退出程序。 
+                var p = System.Diagnostics.Process.GetProcessesByName(strProcessName);
+                if (p?.Length > 1)
+                {
+                    PostThreadMessage(p[0].Threads[0].Id, 0x010, IntPtr.Zero, IntPtr.Zero);
+                    Application.Exit();
+                    Environment.Exit(0);
+                    return;
+                }
+            }
+
+    
+
             //处理未捕获的异常   
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
             //处理UI线程异常   
@@ -25,7 +55,10 @@ namespace tdsCshapu
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            var form = new Form1();
+            Application.AddMessageFilter(new MsgRecev(() => form.autoshoworhide()));
+
+            Application.Run(form);
         }
 
         static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
@@ -49,6 +82,10 @@ namespace tdsCshapu
             Application.Exit();
             System.Environment.Exit(0);
         }
+
+                
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool PostThreadMessage(int threadId, uint msg, IntPtr wParam, IntPtr lParam);
 
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
