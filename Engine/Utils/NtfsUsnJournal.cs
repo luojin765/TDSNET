@@ -1,7 +1,4 @@
 ﻿// NtfsUsnJournal.cs
-using CNChar;
-using PInvoke;
-using QueryEngine;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,12 +6,13 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using TDSNET.Engine.Actions.USN;
 
-namespace UsnJournal
+namespace TDSNET.Engine.Utils
 {
     public class NtfsUsnJournal : IDisposable
     {
-        protected const UInt64 ROOT_FILE_REFERENCE_NUMBER = 0x5000000000005L;  //根目录
+        protected const ulong ROOT_FILE_REFERENCE_NUMBER = 0x5000000000005L;  //根目录
 
         #region enum(s)
         public enum UsnJournalReturnCode
@@ -80,7 +78,7 @@ namespace UsnJournal
 
         #region properties
 
-       // private static TimeSpan _elapsedTime;
+        // private static TimeSpan _elapsedTime;
         //public static TimeSpan ElapsedTime
         //{
         //    get { return _elapsedTime; }
@@ -89,7 +87,7 @@ namespace UsnJournal
         public string VolumeName
         {
             get { return _driveInfo.Name; }
-            
+
         }
 
         public long AvailableFreeSpace
@@ -303,7 +301,7 @@ namespace UsnJournal
                     Win32Api.DELETE_USN_JOURNAL_DATA dujd = new Win32Api.DELETE_USN_JOURNAL_DATA
                     {
                         UsnJournalID = journalState.UsnJournalID,
-                        DeleteFlags = (UInt32)Win32Api.UsnJournalDeleteFlags.USN_DELETE_FLAG_DELETE
+                        DeleteFlags = (uint)Win32Api.UsnJournalDeleteFlags.USN_DELETE_FLAG_DELETE
                     };
 
                     int sizeDujd = Marshal.SizeOf(dujd);
@@ -340,11 +338,11 @@ namespace UsnJournal
 
 
         ///Getall
-        public Dictionary<UInt64, FrnFileOrigin> GetNtfsVolumeAllentries(char volname, out UsnJournalReturnCode usnRtnCode, FileSys filesys)
+        public Dictionary<ulong, FrnFileOrigin> GetNtfsVolumeAllentries(char volname, out UsnJournalReturnCode usnRtnCode, FileSys filesys)
         {
-            Dictionary<UInt64, FrnFileOrigin> foldersAndFiles = filesys.files;
+            Dictionary<ulong, FrnFileOrigin> foldersAndFiles = filesys.files;
 
-            foldersAndFiles.Add(ROOT_FILE_REFERENCE_NUMBER, FrnFileOrigin.Create("",volname, ROOT_FILE_REFERENCE_NUMBER, null));
+            foldersAndFiles.Add(ROOT_FILE_REFERENCE_NUMBER, FrnFileOrigin.Create("", volname, ROOT_FILE_REFERENCE_NUMBER, null));
 
             usnRtnCode = UsnJournalReturnCode.VOLUME_NOT_NTFS;
             if (bNtfsVolume)
@@ -363,7 +361,7 @@ namespace UsnJournal
                         med.StartFileReferenceNumber = 0;
                         med.LowUsn = 0;
                         med.HighUsn = usnState.NextUsn;
-                        Int32 sizeMftEnumData = Marshal.SizeOf(med);
+                        int sizeMftEnumData = Marshal.SizeOf(med);
                         IntPtr medBuffer = Marshal.AllocHGlobal(sizeMftEnumData);
                         Win32Api.RtlZeroMemory(medBuffer, sizeMftEnumData);
                         Marshal.StructureToPtr(med, medBuffer, true);
@@ -371,7 +369,7 @@ namespace UsnJournal
                         //
                         // set up the data buffer which receives the USN_Record data
                         //
-                        int pDataSize = sizeof(UInt64) * 10000;
+                        int pDataSize = sizeof(ulong) * 10000;
                         IntPtr pData = Marshal.AllocHGlobal(pDataSize);
                         Win32Api.RtlZeroMemory(pData, pDataSize);
                         uint outBytesReturned;
@@ -389,7 +387,7 @@ namespace UsnJournal
                             out outBytesReturned,
                             IntPtr.Zero))
                         {
-                            IntPtr pUsnRecord = new IntPtr(pData.ToInt64() + sizeof(Int64));
+                            IntPtr pUsnRecord = new IntPtr(pData.ToInt64() + sizeof(long));
                             while (outBytesReturned > 60)
                             {
                                 Win32Api.UsnEntry usnEntry = new Win32Api.UsnEntry(pUsnRecord);
@@ -460,7 +458,7 @@ namespace UsnJournal
         /// </remarks>
 
         public UsnJournalReturnCode
-            GetPathFromFileReference(UInt64 frn, out string path)
+            GetPathFromFileReference(ulong frn, out string path)
         {
             _ = DateTime.Now;
             path = "Unavailable"
@@ -667,7 +665,7 @@ namespace UsnJournal
         /// </remarks>
         public UsnJournalReturnCode
             GetUsnJournalEntries(Win32Api.USN_JOURNAL_DATA previousUsnState,
-            UInt32 reasonMask,
+            uint reasonMask,
             out List<Win32Api.UsnEntry> usnEntries,
             out Win32Api.USN_JOURNAL_DATA newUsnState)
         {
@@ -690,7 +688,7 @@ namespace UsnJournal
                         //
                         // sequentially process the usn journal looking for image file entries
                         //
-                        int pbDataSize = sizeof(UInt64) * 0x4000;
+                        int pbDataSize = sizeof(ulong) * 0x4000;
                         IntPtr pbData = Marshal.AllocHGlobal(pbDataSize);
                         Win32Api.RtlZeroMemory(pbData, pbDataSize);
                         Win32Api.READ_USN_JOURNAL_DATA rujd = new Win32Api.READ_USN_JOURNAL_DATA
@@ -724,7 +722,7 @@ namespace UsnJournal
                                     IntPtr.Zero);
                             if (bRtn)
                             {
-                                IntPtr pUsnRecord = new IntPtr(pbData.ToInt64() + sizeof(UInt64));
+                                IntPtr pUsnRecord = new IntPtr(pbData.ToInt64() + sizeof(ulong));
                                 while (outBytesReturned > 60)   // while there are at least one entry in the usn journal
                                 {
                                     Win32Api.UsnEntry usnEntry = new Win32Api.UsnEntry(pUsnRecord);
@@ -755,7 +753,7 @@ namespace UsnJournal
                                 break;
                             }
 
-                            Int64 nextUsn = Marshal.ReadInt64(pbData, 0);
+                            long nextUsn = Marshal.ReadInt64(pbData, 0);
                             if (nextUsn >= newUsnState.NextUsn)
                             {
                                 break;
@@ -928,8 +926,8 @@ namespace UsnJournal
 
                 if (bRtn)
                 {
-                    UInt64 fileIndexHigh = (UInt64)fi.FileIndexHigh;
-                    _ = (fileIndexHigh << 32) | fi.FileIndexLow;
+                    ulong fileIndexHigh = fi.FileIndexHigh;
+                    _ = fileIndexHigh << 32 | fi.FileIndexLow;
                     volumeSerialNumber = fi.VolumeSerialNumber;
                 }
                 else

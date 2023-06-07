@@ -1,13 +1,7 @@
 ﻿using System.Windows.Forms;
 
 namespace DoubleBuffer
-
-
 {
-
-
-
-
 
     class ListviewNF : System.Windows.Forms.ListView
     {

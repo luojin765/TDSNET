@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace TDSNET
+namespace TDSNET.UI
 {
     internal class MsgRecev : IMessageFilter
     {
         Action act;
-        public MsgRecev(Action act) {
+        public MsgRecev(Action act)
+        {
             this.act = act;
         }
 

@@ -1,9 +1,5 @@
-﻿using CNChar;
-using DoActions;
-using FileContentSearch;
+﻿using FileContentSearch;
 using Microsoft.Win32;
-using PInvoke;
-using QueryEngine;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -20,9 +16,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using SystemMenu;
 using TDSNET;
-using UsnJournal;
+using TDSNET.Engine.Actions;
+using TDSNET.Engine.Actions.USN;
+using TDSNET.Engine.Utils;
+using TDSNET.UI;
 
 
 
@@ -139,6 +137,12 @@ namespace tdsCshapu
 
         public bool refcache = false;
 
+
+        class tmp{
+            
+            string a;
+        string b;
+        }
         public Form1()
         {
 
@@ -178,7 +182,7 @@ namespace tdsCshapu
 
         static string GetPath(FrnFileOrigin f)
         {
-            string path = MyFunctions.GetPathStr(f).ToString();
+            string path = StringUtils.GetPathStr(f).ToString();
             if (path.EndsWith(':'))
             {
                 return path + "\\";

@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 
-namespace tdsCshapu
+namespace TDSNET.Engine.Actions
 {
     class FindWindowS
     {
@@ -98,26 +98,26 @@ namespace tdsCshapu
 
                 if (msgHandle != IntPtr.Zero)
                 {
-                    
-                        EnumChildWindows(msgHandle, EnumChildProcC, 0);
-                   
-                   
+
+                    EnumChildWindows(msgHandle, EnumChildProcC, 0);
+
+
                     //   MessageBox.Show(EditHandle.Count.ToString());
                     if (EditHandle.Count > 0)
                     {
-                        
-                            foreach (string b in buttons)
+
+                        foreach (string b in buttons)
+                        {
+                            IntPtr btnHandle = FindWindowEx(msgHandle, 0, null, b);
+                            if (btnHandle != IntPtr.Zero)
                             {
-                                IntPtr btnHandle = FindWindowEx(msgHandle, 0, null, b);
-                                if (btnHandle != IntPtr.Zero)
-                                {
 
-                                    return true;
+                                return true;
 
-                                }
                             }
-                        
-                       
+                        }
+
+
                     }
                 }
             }
@@ -137,26 +137,26 @@ namespace tdsCshapu
                 {
 
 
-                   
-                        EnumChildWindows(msgHandle, EnumChildProcC, 0);
-                  
+
+                    EnumChildWindows(msgHandle, EnumChildProcC, 0);
+
 
 
 
 
                     //   MessageBox.Show(EditHandle.Count.ToString());
-                   
-                  
+
+
                     if (EditHandle.Count > 0)
                     {
 
                         foreach (IntPtr h in EditHandle)
                         {
-                           
-                                SendMessage(h, WM_CHAR, 32, null);
-                                //     SendMessage(h, EN_CHANGE, 0, null);
-                                SendMessage(h, WM_SETTEXT, 0, path);
-                            
+
+                            SendMessage(h, WM_CHAR, 32, null);
+                            //     SendMessage(h, EN_CHANGE, 0, null);
+                            SendMessage(h, WM_SETTEXT, 0, path);
+
 
                         }
 
@@ -167,22 +167,22 @@ namespace tdsCshapu
 
                             if (btnHandle != IntPtr.Zero)
                             {
-                               
-                                    SendMessage(btnHandle, BM_CLICK, 0, null);
 
-                                    foreach (IntPtr h in EditHandle)
-                                    {
+                                SendMessage(btnHandle, BM_CLICK, 0, null);
 
-                                        SendMessage(h, WM_SETTEXT, 0, null);
-                                    }
-                                
+                                foreach (IntPtr h in EditHandle)
+                                {
+
+                                    SendMessage(h, WM_SETTEXT, 0, null);
+                                }
+
                                 return;
 
 
                             }
                         }
                     }
-                   
+
                 }
             }
 

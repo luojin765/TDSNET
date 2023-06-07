@@ -7,11 +7,11 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.IO;
 
-namespace tdsCshapu
+namespace TDSNET.Engine.Actions
 {
 
- 
- 
+
+
     public static class IFileHelper
     {
         public static uint SHGFI_ICON = 0x100;
@@ -71,11 +71,11 @@ namespace tdsCshapu
             }
 
 
-            if (iconCache.TryGetValue(exten,out int index))
+            if (iconCache.TryGetValue(exten, out int index))
             {
                 return index;
             }
-            else 
+            else
             {
                 try
                 {
@@ -84,7 +84,7 @@ namespace tdsCshapu
                     Marshal.SizeOf(vFileInfo), SHGFI_SYSICONINDEX | SHGFI_USEFILEATTRIBUTES);
                     if (pSH != IntPtr.Zero)
                     {
-                        if(exten != ".exe" && exten != ".lnk")
+                        if (exten != ".exe" && exten != ".lnk")
                         {
                             iconCache.Add(exten, vFileInfo.iIcon);
                         }
@@ -104,11 +104,11 @@ namespace tdsCshapu
 
         public struct SHFILEINFO
         {
-        public IntPtr hIcon;
-        public int iIcon;
-        public int dwAttributes;
-        public string szDisplayName;
-        public string szTypeName;
-    }
+            public IntPtr hIcon;
+            public int iIcon;
+            public int dwAttributes;
+            public string szDisplayName;
+            public string szTypeName;
+        }
     }
 }

@@ -7,7 +7,7 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace PInvoke
+namespace TDSNET.Engine.Actions.USN
 {
     public class Win32Api
     {
@@ -90,84 +90,84 @@ namespace PInvoke
 
         #region constants
         // CTL_CODE( DeviceType, Function, Method, Access ) (((DeviceType) << 16) | ((Access) << 14) | ((Function) << 2) | (Method))
-        private const UInt32 FILE_DEVICE_FILE_SYSTEM = 0x00000009;
+        private const uint FILE_DEVICE_FILE_SYSTEM = 0x00000009;
 
         //public const OBJ_KERNEL_HANDLE = 0x200;
-        private const UInt32 METHOD_NEITHER = 3;
+        private const uint METHOD_NEITHER = 3;
 
-        private const UInt32 METHOD_BUFFERED = 0;
+        private const uint METHOD_BUFFERED = 0;
 
-        private const UInt32 FILE_ANY_ACCESS = 0;
+        private const uint FILE_ANY_ACCESS = 0;
 
-        private const UInt32 FILE_SPECIAL_ACCESS = 0;
+        private const uint FILE_SPECIAL_ACCESS = 0;
 
-        private const UInt32 FILE_READ_ACCESS = 1;
+        private const uint FILE_READ_ACCESS = 1;
 
-        private const UInt32 FILE_WRITE_ACCESS = 2;
+        private const uint FILE_WRITE_ACCESS = 2;
 
-        public const Int32 INVALID_HANDLE_VALUE = -1;
+        public const int INVALID_HANDLE_VALUE = -1;
 
-        public const UInt32 GENERIC_READ = 0x80000000;
-        public const UInt32 GENERIC_WRITE = 0x40000000;
-        public const UInt32 FILE_SHARE_READ = 0x00000001;
-        public const UInt32 FILE_SHARE_WRITE = 0x00000002;
-        public const UInt32 FILE_ATTRIBUTE_DIRECTORY = 0x00000010;
+        public const uint GENERIC_READ = 0x80000000;
+        public const uint GENERIC_WRITE = 0x40000000;
+        public const uint FILE_SHARE_READ = 0x00000001;
+        public const uint FILE_SHARE_WRITE = 0x00000002;
+        public const uint FILE_ATTRIBUTE_DIRECTORY = 0x00000010;
 
-        public const UInt32 CREATE_NEW = 1;
-        public const UInt32 CREATE_ALWAYS = 2;
-        public const UInt32 OPEN_EXISTING = 3;
-        public const UInt32 OPEN_ALWAYS = 4;
-        public const UInt32 TRUNCATE_EXISTING = 5;
+        public const uint CREATE_NEW = 1;
+        public const uint CREATE_ALWAYS = 2;
+        public const uint OPEN_EXISTING = 3;
+        public const uint OPEN_ALWAYS = 4;
+        public const uint TRUNCATE_EXISTING = 5;
 
-        public const UInt32 FILE_ATTRIBUTE_NORMAL = 0x80;
-        public const UInt32 FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
-        public const UInt32 FileNameInformationClass = 9;
-        public const UInt32 FILE_OPEN_FOR_BACKUP_INTENT = 0x4000;
-        public const UInt32 FILE_OPEN_BY_FILE_ID = 0x2000;
-        public const UInt32 FILE_OPEN = 0x1;
-        public const UInt32 OBJ_CASE_INSENSITIVE = 0x40;
-        public const UInt32 USN_REASON_DATA_OVERWRITE = 0x00000001;
-        public const UInt32 USN_REASON_DATA_EXTEND = 0x00000002;
-        public const UInt32 USN_REASON_DATA_TRUNCATION = 0x00000004;
-        public const UInt32 USN_REASON_NAMED_DATA_OVERWRITE = 0x00000010;
-        public const UInt32 USN_REASON_NAMED_DATA_EXTEND = 0x00000020;
-        public const UInt32 USN_REASON_NAMED_DATA_TRUNCATION = 0x00000040;
-        public const UInt32 USN_REASON_FILE_CREATE = 0x00000100;
-        public const UInt32 USN_REASON_FILE_DELETE = 0x00000200;
-        public const UInt32 USN_REASON_EA_CHANGE = 0x00000400;
-        public const UInt32 USN_REASON_SECURITY_CHANGE = 0x00000800;
-        public const UInt32 USN_REASON_RENAME_OLD_NAME = 0x00001000;
-        public const UInt32 USN_REASON_RENAME_NEW_NAME = 0x00002000;
-        public const UInt32 USN_REASON_INDEXABLE_CHANGE = 0x00004000;
-        public const UInt32 USN_REASON_BASIC_INFO_CHANGE = 0x00008000;
-        public const UInt32 USN_REASON_HARD_LINK_CHANGE = 0x00010000;
-        public const UInt32 USN_REASON_COMPRESSION_CHANGE = 0x00020000;
-        public const UInt32 USN_REASON_ENCRYPTION_CHANGE = 0x00040000;
-        public const UInt32 USN_REASON_OBJECT_ID_CHANGE = 0x00080000;
-        public const UInt32 USN_REASON_REPARSE_POINT_CHANGE = 0x00100000;
-        public const UInt32 USN_REASON_STREAM_CHANGE = 0x00200000;
-        public const UInt32 USN_REASON_CLOSE = 0x80000000;
+        public const uint FILE_ATTRIBUTE_NORMAL = 0x80;
+        public const uint FILE_FLAG_BACKUP_SEMANTICS = 0x02000000;
+        public const uint FileNameInformationClass = 9;
+        public const uint FILE_OPEN_FOR_BACKUP_INTENT = 0x4000;
+        public const uint FILE_OPEN_BY_FILE_ID = 0x2000;
+        public const uint FILE_OPEN = 0x1;
+        public const uint OBJ_CASE_INSENSITIVE = 0x40;
+        public const uint USN_REASON_DATA_OVERWRITE = 0x00000001;
+        public const uint USN_REASON_DATA_EXTEND = 0x00000002;
+        public const uint USN_REASON_DATA_TRUNCATION = 0x00000004;
+        public const uint USN_REASON_NAMED_DATA_OVERWRITE = 0x00000010;
+        public const uint USN_REASON_NAMED_DATA_EXTEND = 0x00000020;
+        public const uint USN_REASON_NAMED_DATA_TRUNCATION = 0x00000040;
+        public const uint USN_REASON_FILE_CREATE = 0x00000100;
+        public const uint USN_REASON_FILE_DELETE = 0x00000200;
+        public const uint USN_REASON_EA_CHANGE = 0x00000400;
+        public const uint USN_REASON_SECURITY_CHANGE = 0x00000800;
+        public const uint USN_REASON_RENAME_OLD_NAME = 0x00001000;
+        public const uint USN_REASON_RENAME_NEW_NAME = 0x00002000;
+        public const uint USN_REASON_INDEXABLE_CHANGE = 0x00004000;
+        public const uint USN_REASON_BASIC_INFO_CHANGE = 0x00008000;
+        public const uint USN_REASON_HARD_LINK_CHANGE = 0x00010000;
+        public const uint USN_REASON_COMPRESSION_CHANGE = 0x00020000;
+        public const uint USN_REASON_ENCRYPTION_CHANGE = 0x00040000;
+        public const uint USN_REASON_OBJECT_ID_CHANGE = 0x00080000;
+        public const uint USN_REASON_REPARSE_POINT_CHANGE = 0x00100000;
+        public const uint USN_REASON_STREAM_CHANGE = 0x00200000;
+        public const uint USN_REASON_CLOSE = 0x80000000;
 
-        public const UInt32 FSCTL_GET_OBJECT_ID = 0x9009c;
+        public const uint FSCTL_GET_OBJECT_ID = 0x9009c;
 
         // FSCTL_ENUM_USN_DATA = CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 44,  METHOD_NEITHER, FILE_ANY_ACCESS)
-        public const UInt32 FSCTL_ENUM_USN_DATA = (FILE_DEVICE_FILE_SYSTEM << 16) | (FILE_ANY_ACCESS << 14) | (44 << 2) | METHOD_NEITHER;
+        public const uint FSCTL_ENUM_USN_DATA = FILE_DEVICE_FILE_SYSTEM << 16 | FILE_ANY_ACCESS << 14 | 44 << 2 | METHOD_NEITHER;
 
         // FSCTL_READ_USN_JOURNAL = CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 46,  METHOD_NEITHER, FILE_ANY_ACCESS)
-        public const UInt32 FSCTL_READ_USN_JOURNAL = (FILE_DEVICE_FILE_SYSTEM << 16) | (FILE_ANY_ACCESS << 14) | (46 << 2) | METHOD_NEITHER;
+        public const uint FSCTL_READ_USN_JOURNAL = FILE_DEVICE_FILE_SYSTEM << 16 | FILE_ANY_ACCESS << 14 | 46 << 2 | METHOD_NEITHER;
 
         //  FSCTL_CREATE_USN_JOURNAL        CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 57,  METHOD_NEITHER, FILE_ANY_ACCESS)
-        public const UInt32 FSCTL_CREATE_USN_JOURNAL = (FILE_DEVICE_FILE_SYSTEM << 16) | (FILE_ANY_ACCESS << 14) | (57 << 2) | METHOD_NEITHER;
+        public const uint FSCTL_CREATE_USN_JOURNAL = FILE_DEVICE_FILE_SYSTEM << 16 | FILE_ANY_ACCESS << 14 | 57 << 2 | METHOD_NEITHER;
 
         //  FSCTL_QUERY_USN_JOURNAL         CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 61, METHOD_BUFFERED, FILE_ANY_ACCESS)
-        public const UInt32 FSCTL_QUERY_USN_JOURNAL = (FILE_DEVICE_FILE_SYSTEM << 16) | (FILE_ANY_ACCESS << 14) | (61 << 2) | METHOD_BUFFERED;
+        public const uint FSCTL_QUERY_USN_JOURNAL = FILE_DEVICE_FILE_SYSTEM << 16 | FILE_ANY_ACCESS << 14 | 61 << 2 | METHOD_BUFFERED;
 
         // FSCTL_DELETE_USN_JOURNAL        CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 62, METHOD_BUFFERED, FILE_ANY_ACCESS)
-        public const UInt32 FSCTL_DELETE_USN_JOURNAL = (FILE_DEVICE_FILE_SYSTEM << 16) | (FILE_ANY_ACCESS << 14) | (62 << 2) | METHOD_BUFFERED;
+        public const uint FSCTL_DELETE_USN_JOURNAL = FILE_DEVICE_FILE_SYSTEM << 16 | FILE_ANY_ACCESS << 14 | 62 << 2 | METHOD_BUFFERED;
 
-        public static Int32 GWL_EXSTYLE = -20;
-        public static Int32 WS_EX_LAYERED = 0x00080000;
-        public static Int32 WS_EX_TRANSPARENT = 0x00000020;
+        public static int GWL_EXSTYLE = -20;
+        public static int WS_EX_LAYERED = 0x00080000;
+        public static int WS_EX_TRANSPARENT = 0x00000020;
         #endregion
 
         #region dll imports
@@ -299,11 +299,11 @@ namespace PInvoke
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool DeviceIoControl(
             IntPtr hDevice,
-            UInt32 dwIoControlCode,
+            uint dwIoControlCode,
             IntPtr lpInBuffer,
-            Int32 nInBufferSize,
+            int nInBufferSize,
             out USN_JOURNAL_DATA lpOutBuffer,
-            Int32 nOutBufferSize,
+            int nOutBufferSize,
             out uint lpBytesReturned,
             IntPtr lpOverlapped);
 
@@ -323,11 +323,11 @@ namespace PInvoke
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool DeviceIoControl(
             IntPtr hDevice,
-            UInt32 dwIoControlCode,
+            uint dwIoControlCode,
             IntPtr lpInBuffer,
-            Int32 nInBufferSize,
+            int nInBufferSize,
             IntPtr lpOutBuffer,
-            Int32 nOutBufferSize,
+            int nOutBufferSize,
             out uint lpBytesReturned,
             IntPtr lpOverlapped);
 
@@ -359,7 +359,7 @@ namespace PInvoke
         /// If the function fails, the return value is zero. To get extended error information, call GetLastError
         ///</returns>
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern Int32 GetWindowLong(IntPtr hWnd, Int32 nIndex);
+        public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
 
         /// <summary>
         /// changes an attribute of the specified window. The function also sets the 32-bit (long) value at 
@@ -372,7 +372,7 @@ namespace PInvoke
         /// integer. If the function fails, the return value is zero. To get extended error information, call GetLastError.
         /// </returns>
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        public static extern Int32 SetWindowLong(IntPtr hWnd, Int32 nIndex, Int32 newVal);
+        public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int newVal);
 
         /// <summary>
         /// Creates a new file or directory, or opens an existing file, device, directory, or volume
@@ -457,13 +457,13 @@ namespace PInvoke
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct USN_JOURNAL_DATA
         {
-            public UInt64 UsnJournalID;
-            public Int64 FirstUsn;
-            public Int64 NextUsn;
-            public Int64 LowestValidUsn;
-            public Int64 MaxUsn;
-            public UInt64 MaximumSize;
-            public UInt64 AllocationDelta;
+            public ulong UsnJournalID;
+            public long FirstUsn;
+            public long NextUsn;
+            public long LowestValidUsn;
+            public long MaxUsn;
+            public ulong MaximumSize;
+            public ulong AllocationDelta;
         }
 
         /// <summary>
@@ -473,9 +473,9 @@ namespace PInvoke
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct MFT_ENUM_DATA
         {
-            public UInt64 StartFileReferenceNumber;
-            public Int64 LowUsn;
-            public Int64 HighUsn;
+            public ulong StartFileReferenceNumber;
+            public long LowUsn;
+            public long HighUsn;
         }
 
         /// <summary>
@@ -484,8 +484,8 @@ namespace PInvoke
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct CREATE_USN_JOURNAL_DATA
         {
-            public UInt64 MaximumSize;
-            public UInt64 AllocationDelta;
+            public ulong MaximumSize;
+            public ulong AllocationDelta;
         }
 
         /// <summary>
@@ -494,9 +494,9 @@ namespace PInvoke
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct DELETE_USN_JOURNAL_DATA
         {
-            public UInt64 UsnJournalID;
-            public UInt32 DeleteFlags;
-            public UInt32 Reserved;
+            public ulong UsnJournalID;
+            public uint DeleteFlags;
+            public uint Reserved;
         }
 
         /// <summary>
@@ -529,12 +529,12 @@ namespace PInvoke
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct READ_USN_JOURNAL_DATA
         {
-            public Int64 StartUsn;
-            public UInt32 ReasonMask;
-            public UInt32 ReturnOnlyOnClose;
-            public UInt64 Timeout;
-            public UInt64 bytesToWaitFor;
-            public UInt64 UsnJournalId;
+            public long StartUsn;
+            public uint ReasonMask;
+            public uint ReturnOnlyOnClose;
+            public ulong Timeout;
+            public ulong bytesToWaitFor;
+            public ulong UsnJournalId;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -545,8 +545,8 @@ namespace PInvoke
 
             public POINT(int x, int y)
             {
-                this.X = x;
-                this.Y = y;
+                X = x;
+                Y = y;
             }
         }
 
@@ -560,19 +560,19 @@ namespace PInvoke
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct OBJECT_ATTRIBUTES
         {
-            public Int32 Length;
+            public int Length;
             public IntPtr RootDirectory;
             public IntPtr ObjectName;
-            public Int32 Attributes;
-            public Int32 SecurityDescriptor;
-            public Int32 SecurityQualityOfService;
+            public int Attributes;
+            public int SecurityDescriptor;
+            public int SecurityQualityOfService;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         public struct UNICODE_STRING
         {
-            public Int16 Length;
-            public Int16 MaximumLength;
+            public short Length;
+            public short MaximumLength;
             public IntPtr Buffer;
         }
 
@@ -591,21 +591,21 @@ namespace PInvoke
 
             private const int FN_OFFSET = 58;
 
-            private UInt32 _RecordLength;
+            private uint _RecordLength;
 
-            private Int64 _usn;
+            private long _usn;
 
-            private UInt64 _frn;
+            private ulong _frn;
 
-            private UInt64 _pfrn;
+            private ulong _pfrn;
 
-            private UInt32 _reason;
+            private uint _reason;
 
             private string _name;
 
             private string _oldName;
 
-            private UInt32 _fileAttributes;
+            private uint _fileAttributes;
 
             public const int FA_OFFSET = 52;
             /// <summary>
@@ -614,35 +614,35 @@ namespace PInvoke
             /// <param name="p">Buffer pointer to first byte of the USN Record</param>
             public UsnEntry(IntPtr ptrToUsnRecord)
             {
-                _RecordLength = (UInt32)Marshal.ReadInt32(ptrToUsnRecord);
-                _frn = (UInt64)Marshal.ReadInt64(ptrToUsnRecord, FR_OFFSET);
-                _pfrn = (UInt64)Marshal.ReadInt64(ptrToUsnRecord, PFR_OFFSET);
-                _usn = (Int64)Marshal.ReadInt64(ptrToUsnRecord, USN_OFFSET);
-                _reason = (UInt32)Marshal.ReadInt32(ptrToUsnRecord, REASON_OFFSET);
-                _fileAttributes = (UInt32)Marshal.ReadInt32(ptrToUsnRecord, FA_OFFSET);
+                _RecordLength = (uint)Marshal.ReadInt32(ptrToUsnRecord);
+                _frn = (ulong)Marshal.ReadInt64(ptrToUsnRecord, FR_OFFSET);
+                _pfrn = (ulong)Marshal.ReadInt64(ptrToUsnRecord, PFR_OFFSET);
+                _usn = Marshal.ReadInt64(ptrToUsnRecord, USN_OFFSET);
+                _reason = (uint)Marshal.ReadInt32(ptrToUsnRecord, REASON_OFFSET);
+                _fileAttributes = (uint)Marshal.ReadInt32(ptrToUsnRecord, FA_OFFSET);
                 short fileNameLength = Marshal.ReadInt16(ptrToUsnRecord, FNL_OFFSET);
                 short fileNameOffset = Marshal.ReadInt16(ptrToUsnRecord, FN_OFFSET);
                 _name = Marshal.PtrToStringUni(new IntPtr(ptrToUsnRecord.ToInt64() + fileNameOffset), fileNameLength / sizeof(char));
 
             }
 
-            public UInt32 RecordLength
+            public uint RecordLength
             {
                 get { return _RecordLength; }
             }
-            public Int64 USN
+            public long USN
             {
                 get { return _usn; }
             }
-            public UInt64 FileReferenceNumber
+            public ulong FileReferenceNumber
             {
                 get { return _frn; }
             }
-            public UInt64 ParentFileReferenceNumber
+            public ulong ParentFileReferenceNumber
             {
                 get { return _pfrn; }
             }
-            public UInt32 Reason
+            public uint Reason
             {
                 get { return _reason; }
             }
@@ -673,7 +673,7 @@ namespace PInvoke
                 get
                 {
                     bool bRtn = false;
-                    if (0 != (_fileAttributes & Win32Api.FILE_ATTRIBUTE_DIRECTORY))
+                    if (0 != (_fileAttributes & FILE_ATTRIBUTE_DIRECTORY))
                     {
                         bRtn = true;
                     }
@@ -686,7 +686,7 @@ namespace PInvoke
                 get
                 {
                     bool bRtn = false;
-                    if (0 == (_fileAttributes & Win32Api.FILE_ATTRIBUTE_DIRECTORY))
+                    if (0 == (_fileAttributes & FILE_ATTRIBUTE_DIRECTORY))
                     {
                         bRtn = true;
                     }
@@ -697,7 +697,7 @@ namespace PInvoke
 
             public int CompareTo(UsnEntry other)
             {
-                return string.Compare(this.Name, other.Name, true);
+                return string.Compare(Name, other.Name, true);
             }
 
             #endregion
@@ -853,7 +853,7 @@ namespace PInvoke
                     bool bRtn = WriteFile(hFile, txtBuffer, sizeof(char) * nBytes, out count, 0);
                     if (!bRtn)
                     {
-                        if ((sizeof(char) * nBytes) != count)
+                        if (sizeof(char) * nBytes != count)
                         {
                             throw new Exception(string.Format("Bytes written {0} should be {1} for file {2}.",
                                 count, sizeof(char) * nBytes, AltStreamDesc));
@@ -880,7 +880,7 @@ namespace PInvoke
                 CloseHandle(hFile);
                 hFile = IntPtr.Zero;
                 Marshal.FreeHGlobal(txtBuffer);
-               // GC.Collect();
+                // GC.Collect();
             }
         }
 
@@ -1019,7 +1019,7 @@ namespace PInvoke
                 {
                     Marshal.FreeHGlobal(buffer);
                 }
-               // GC.Collect();
+                // GC.Collect();
             }
             return returnstring;
         }
