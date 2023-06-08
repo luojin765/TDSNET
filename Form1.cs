@@ -31,8 +31,6 @@ namespace tdsCshapu
         static readonly ParallelOptions parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = 4 };
         static readonly ParallelOptions parallelOptionsTwo = new ParallelOptions() { MaxDegreeOfParallelism = 2 };
 
-        static readonly object fileLock = new object();
-
         private const int MAX_PATH = 260;
 
         private const int CSIDL_COMMON_PROGRAMS = 0x0017;
@@ -457,16 +455,21 @@ namespace tdsCshapu
             return new ListViewItem(new string[] { name, path }, f.IcoIndex);
         }
 
+        readonly object inputLock=new();
+
         private void Keywords_TextChanged(object sender, EventArgs e)
         {
             Task.Run(() =>
             {
-                Txtselected = false;
-                key1 = Keywords.Text.Trim();
-                if (!(key1 == key2))
+                lock (inputLock)
                 {
-                    dosearch(key1);
-                    key2 = key1;
+                    Txtselected = false;
+                    key1 = Keywords.Text.Trim();
+                    if (!(key1 == key2))
+                    {
+                        dosearch(key1);
+                        key2 = key1;
+                    }
                 }
             });
         }
@@ -490,7 +493,6 @@ namespace tdsCshapu
         int vresultNum = 0;
 
 
-        private static SpinLock spinLock = new SpinLock();
 
         private void SearchFilesThreadStart()
         {
@@ -574,28 +576,26 @@ namespace tdsCshapu
                 {
                     if (DoUSNupdate)
                     {
-                        lock (fileLock)
-                        {
-                            for (int i = 0; i < fileSysList.Count; i++)
-                            {
-                                try
-                                {
-                                    fileSysList[i].DoWhileFileChanges();
-                                }
 
-                                catch
-                                {
-                                    continue;
-                                }
+                        for (int i = 0; i < fileSysList.Count; i++)
+                        {
+                            try
+                            {
+                                fileSysList[i].DoWhileFileChanges();
+                            }
+
+                            catch
+                            {
+                                continue;
                             }
                         }
+
                     }
 
 
 
-                    lock (fileLock)
-                    {
-                        for (int d = 0; d < fileSysList.Count; d++)
+
+                    for (int d = 0; d < fileSysList.Count; d++)
                         {
                             if (Threadrest) { goto Restart; } //终止标签
 
@@ -609,7 +609,7 @@ namespace tdsCshapu
                                 bool driverFound = false;
                                 foreach (string driverName in driverNames)
                                 {
-                                    if (driverName.ToUpperInvariant() == fs.driveInfo.Name.TrimEnd('\\').Trim(':').ToUpperInvariant())
+                                    if (string.Equals(driverName,fs.driveInfo.Name[0].ToString(),StringComparison.OrdinalIgnoreCase))
                                     {
                                         driverFound = true;
                                         break;
@@ -696,7 +696,7 @@ namespace tdsCshapu
 
 
                         }
-                    }
+                    
 
                 }
                 catch (Exception ex)
@@ -726,262 +726,8 @@ Restart:;
 
             }
         }
+         
 
-        private bool UpdateWithSpinLock(FrnFileOrigin f, ref int resultNum)
-        {
-            bool lockTaken = false;
-            try
-            {
-                spinLock.Enter(ref lockTaken);
-                resultNum++;
-                vlist[resultNum - 1] = f;
-
-
-                if (findmax != 0 && resultNum > findmax && isAll == false)
-                {
-                    return false;
-                }
-
-                if (resultNum == 200)//提前显示
-                {
-                    vresultNum = resultNum;
-                    refcache = true;
-                    istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步                                  
-                }
-
-            }
-            finally
-            {
-                if (lockTaken) spinLock.Exit(false);
-            }
-          
-            return true;
-        }
-
-
-        private void SearchFilesThreadStartST()
-        {
-            Threadrunning = true;
-
-            while (Threadrunning == true)
-            {
-                string[] dwords = null;
-                string[] words;
-                int dlen = 0;
-                int len;
-                UInt64 unidwords = 0;
-                UInt64 uniwords;
-                bool DoDirectory = false;
-                int resultNum = 0;
-
-                gOs.WaitOne();
-                Threadrest = false;  //重启标签
-
-                if (IFShowR == true) { this.BeginInvoke(new EnableTxt(ShowRecord)); goto Restart; }
-
-                string threadKeyword = keyword;
-
-                string[] driverNames = null;
-
-                if (threadKeyword.Contains(":"))
-                {
-                    driverNames = (threadKeyword.Split(':'))[0].Split(',');
-                    threadKeyword = (threadKeyword.Split(':'))[1];
-                }
-
-                threadKeyword = threadKeyword.ToUpperInvariant().Replace("  ", " ").Replace("  ", " ");
-                isAll = false;
-
-
-                if (threadKeyword.Contains(" /A")) { threadKeyword = threadKeyword.Replace(" /A", ""); isAll = true; }
-
-                if (threadKeyword.Contains("\\"))
-                {
-
-                    string[] tmp = threadKeyword.Split('\\');
-                    string tmpdword = tmp[0].Replace(" ", " ");
-                    string tmpword = tmp[1].Replace(" ", " ");
-                    dlen = tmpdword.Length;
-                    len = tmpword.Length;
-                    unidwords = FileSys.TBS(SpellCN.GetSpellCode(tmpdword));
-
-                    uniwords = FileSys.TBS(SpellCN.GetSpellCode(tmpword));
-
-
-                    if (tmp[0].Contains(" "))
-                    {
-                        dwords = tmp[0].Split(' ');
-
-                    }
-                    else
-                    {
-                        dwords = new string[] { tmp[0] };
-                    }
-                    if (tmp[1].Contains(" "))
-                    {
-                        words = tmp[1].Split(' ');
-
-                    }
-                    else
-                    {
-                        words = new string[] { tmp[1] };
-                    }
-
-                    DoDirectory = true;
-                }
-                else
-                {
-                    words = threadKeyword.Split(' ');
-                    string tmpword = threadKeyword.Replace(" ", "");
-                    len = tmpword.Length;
-                    uniwords = FileSys.TBS(SpellCN.GetSpellCode(tmpword));
-                }
-
-                try
-                {
-                    if (DoUSNupdate)
-                    {
-                        lock (fileLock)
-                        {
-                            for (int i = 0; i < fileSysList.Count; i++)
-                            {
-                                try
-                                {
-                                    fileSysList[i].DoWhileFileChanges();
-                                }
-
-                                catch
-                                {
-                                    continue;
-                                }
-                            }
-                        }
-                    }
-
-
-
-                    lock (fileLock)
-                    {
-                        for (int d = 0; d < fileSysList.Count; d++)
-                        {
-                            if (Threadrest) { goto Restart; } //终止标签
-
-                            var fs = fileSysList[d];
-                            var l = fs.files;
-
-                            if (!(l.Values.Count > 0 && Directory.Exists(fs.driveInfo.Name))) continue;
-
-                            if (driverNames != null)
-                            {
-                                bool driverFound = false;
-                                foreach (string driverName in driverNames)
-                                {
-                                    if (driverName.ToUpperInvariant() == fs.driveInfo.Name.TrimEnd('\\').Trim(':').ToUpperInvariant())
-                                    {
-                                        driverFound = true;
-                                        break;
-                                    }
-                                }
-
-                                if (!driverFound)
-                                {
-                                    continue;
-                                }
-                            }
-
-                            object listLock = new();
-
-
-
-                            foreach (FrnFileOrigin f in fs.files.Values)
-                            {
-
-                                if (Threadrest) { goto Restart; } //终止标签
-
-                                bool Finded = true;
-
-                                if (DoDirectory)
-                                {
-
-                                    if (f.parentFrn != null && l.TryGetValue(f.parentFrn.fileReferenceNumber, out FrnFileOrigin dictmp))
-                                    {
-                                        foreach (string key in dwords)
-                                        {
-                                            if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.fileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) == -1))
-                                            {
-                                                Finded = false;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Finded = false;
-                                    }
-                                }
-
-                                if (!Finded) { continue; }
-
-                                foreach (string key in words)
-                                {
-                                    if (((uniwords | f.keyindex) != f.keyindex) || (f.fileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) == -1))
-                                    {
-                                        Finded = false;
-                                        break;
-                                    }
-                                }
-
-                                if (Finded)
-                                {
-
-                                    resultNum++;
-                                    vlist[resultNum - 1] = f;
-
-
-                                    if (findmax != 0 && resultNum > findmax && isAll == false) break;
-
-                                    if (resultNum == 200)//提前显示
-                                    {
-                                        vresultNum = resultNum;
-
-                                        refcache = true;
-                                        istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步                                  
-                                    }
-                                }
-                            }
-
-
-                        }
-                    }
-
-                }
-                catch (Exception ex)
-                {
-                    Log_write("L683" + ex.Message + ";" + ex.StackTrace);
-                }
-
-
-
-                if (!Threadrest)
-                {
-
-                    if (resultNum > 0)
-                    {
-                        vresultNum = resultNum;
-
-                        refcache = true;
-                        istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步
-
-                    }
-                    else
-                    {
-                        istView1.BeginInvoke(new System.EventHandler(listupdate), 0);  //异步BeginInvoke
-                    }
-                }
-Restart:;
-
-            }
-        }
 
 
 
@@ -2541,8 +2287,8 @@ Restart:;
         [DllImport("kernel32.dll", EntryPoint = "SetProcessWorkingSetSize")]
         public static extern int SetProcessWorkingSetSize(IntPtr process, int minSize, int maxSize);
 
-        [DllImport("kernel32.dll", EntryPoint = "VirtualLock")]
-        public static extern bool VirtualLock(IntPtr process, int maxSize);
+        //[DllImport("kernel32.dll", EntryPoint = "VirtualLock")]
+        //public static extern bool VirtualLock(IntPtr process, int maxSize);
 
         /// <summary>
         ///  二进制转换逻辑搜索使用
