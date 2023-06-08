@@ -10,19 +10,21 @@ namespace TDSNET.Engine.Utils
 
 
 
-        public static string GetPathStr(FrnFileOrigin f)
+        public static string GetPathStr(FrnFileOrigin f,string tailStr="")
         {
             string sb = "";
             if (f.parentFrn != null)
             {
-                sb = string.Concat(GetPathStr(f.parentFrn), "\\", tdsCshapu.Form1.getfile(f.fileName));
+                //尾递归
+                tailStr = string.Concat("\\", tdsCshapu.Form1.getfile(f.fileName), tailStr);
+                return GetPathStr(f.parentFrn, tailStr);
             }
             else
             {
-                sb = f.VolumeName + ":";
+                return string.Concat(f.VolumeName, ":",tailStr);
             }
 
-            return sb;
+            
 
         }
 

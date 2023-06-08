@@ -89,6 +89,7 @@ namespace TDSNET.Engine.Actions.USN
         public void DisposeAdditionInfo()
         {
             additionInfo.Dispose();
+            additionInfo = null;
         }
 
     }
@@ -163,7 +164,7 @@ namespace TDSNET.Engine.Actions.USN
                             string nacn = SpellCN.GetSpellCode(f.Name.AsSpan());
                             FrnFileOrigin frn = files[f.FileReferenceNumber];
                             frn.keyindex = TBS(nacn.AsSpan());
-                            if (!string.Equals(nacn, f.Name.ToUpper()))
+                            if (!string.Equals(nacn, f.Name.ToUpperInvariant()))
                             {
                                 frn.fileName = "|" + f.Name + "|" + nacn + "|";
                             }
@@ -184,7 +185,7 @@ namespace TDSNET.Engine.Actions.USN
                         {
                             string nacn = SpellCN.GetSpellCode(f.Name);
                             string name;
-                            if (!string.Equals(nacn, f.Name.ToUpper()))
+                            if (!string.Equals(nacn, f.Name.ToUpperInvariant()))
                             {
                                 name = "|" + f.Name + "|" + nacn + "|";
                             }
@@ -225,7 +226,7 @@ namespace TDSNET.Engine.Actions.USN
 
         const int SCREENCHARNUM = 45;
 
-        static readonly char[] alphbet = { '@', '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '-', '_', '[', ']', '(', ')', '/' };
+        static readonly char[] alphbet = { '@', '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '-', '_', '[', ']', '(', ')', '/'};
 
         public static ulong TBS(ReadOnlySpan<char> txt)
         {

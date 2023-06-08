@@ -313,9 +313,9 @@ namespace tdsCshapu
 
                         Parallel.ForEach(fs.files.Values, parallelOptions, f =>
                         {
-                            string ext = Path.GetExtension(getfile(f.fileName)).ToUpper();
+                            string ext = Path.GetExtension(getfile(f.fileName));
 
-                            if (ext == ".LNK")
+                            if (string.Equals(ext,".LNK",StringComparison.OrdinalIgnoreCase))
                             {
                                 string path = GetPath(f);
                                 if (path.IndexOf(USER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) != -1 || path.IndexOf(ALLUSER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) != -1)
@@ -459,14 +459,16 @@ namespace tdsCshapu
 
         private void Keywords_TextChanged(object sender, EventArgs e)
         {
-
-            Txtselected = false;
-            key1 = Keywords.Text.Trim();
-            if (!(key1 == key2))
+            Task.Run(() =>
             {
-                dosearch(key1);
-                key2 = key1;
-            }
+                Txtselected = false;
+                key1 = Keywords.Text.Trim();
+                if (!(key1 == key2))
+                {
+                    dosearch(key1);
+                    key2 = key1;
+                }
+            });
         }
 
         private void dosearch(string words)
@@ -520,7 +522,7 @@ namespace tdsCshapu
                     threadKeyword = (threadKeyword.Split(':'))[1];
                 }
 
-                threadKeyword = threadKeyword.ToUpper().Replace("  ", " ").Replace("  ", " ");
+                threadKeyword = threadKeyword.ToUpperInvariant().Replace("  ", " ").Replace("  ", " ");
                 isAll = false;
 
 
@@ -607,7 +609,7 @@ namespace tdsCshapu
                                 bool driverFound = false;
                                 foreach (string driverName in driverNames)
                                 {
-                                    if (driverName.ToUpper() == fs.driveInfo.Name.TrimEnd('\\').Trim(':').ToUpper())
+                                    if (driverName.ToUpperInvariant() == fs.driveInfo.Name.TrimEnd('\\').Trim(':').ToUpperInvariant())
                                     {
                                         driverFound = true;
                                         break;
@@ -620,10 +622,22 @@ namespace tdsCshapu
                                 }
                             }
 
-                            Parallel.ForEach(fs.files.Values, parallelOptions, (f, parallelState) =>
+
+                            var comparisondType = StringComparison.OrdinalIgnoreCase;
+                            var comparisonType = StringComparison.OrdinalIgnoreCase;
+                            if (unidwords == 0)
+                            {
+                                comparisondType = StringComparison.Ordinal;
+                            }
+                            if (uniwords == 0)
+                            {
+                                comparisonType = StringComparison.Ordinal;
+                            }
+
+                            foreach(var f in fs.files.Values)
                             {
 
-                                if (Threadrest) { parallelState.Stop(); return; } //终止标签
+                                if (Threadrest) { break; } //终止标签
 
                                 bool Finded = true;
 
@@ -634,7 +648,7 @@ namespace tdsCshapu
                                     {
                                         foreach (string key in dwords)
                                         {
-                                            if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.fileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) == -1))
+                                            if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.fileName.IndexOf(key, comparisondType) == -1))
                                             {
                                                 Finded = false;
                                                 break;
@@ -651,24 +665,34 @@ namespace tdsCshapu
                                 {
                                     foreach (string key in words)
                                     {
-                                        if (((uniwords | f.keyindex) != f.keyindex) || (f.fileName.IndexOf(key, StringComparison.OrdinalIgnoreCase) == -1))
+                                        if (((uniwords | f.keyindex) != f.keyindex) || (f.fileName.IndexOf(key, comparisonType) == -1))
                                         {
                                             Finded = false;
-                                            break;
+                                            break;                                         
                                         }
                                     }
                                 }
 
                                 if (Finded)
                                 {
-                                    if(!UpdateWithSpinLock(f,ref resultNum))
+                                    resultNum++;
+                                    vlist[resultNum - 1] = f;
+
+
+                                    if (findmax != 0 && resultNum > findmax && isAll == false)
                                     {
-                                        parallelState.Stop();
-                                        return;
+                                        break;
                                     }
-                                    
+
+                                    if (resultNum == 200)//提前显示
+                                    {
+                                        vresultNum = resultNum;
+                                        refcache = true;
+                                        istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步                                  
+                                    }
+
                                 }
-                            });
+                            }
 
 
                         }
@@ -765,7 +789,7 @@ Restart:;
                     threadKeyword = (threadKeyword.Split(':'))[1];
                 }
 
-                threadKeyword = threadKeyword.ToUpper().Replace("  ", " ").Replace("  ", " ");
+                threadKeyword = threadKeyword.ToUpperInvariant().Replace("  ", " ").Replace("  ", " ");
                 isAll = false;
 
 
@@ -852,7 +876,7 @@ Restart:;
                                 bool driverFound = false;
                                 foreach (string driverName in driverNames)
                                 {
-                                    if (driverName.ToUpper() == fs.driveInfo.Name.TrimEnd('\\').Trim(':').ToUpper())
+                                    if (driverName.ToUpperInvariant() == fs.driveInfo.Name.TrimEnd('\\').Trim(':').ToUpperInvariant())
                                     {
                                         driverFound = true;
                                         break;
@@ -1536,7 +1560,7 @@ Restart:;
                     {
                         string tmp = Keywords.Text.Trim();
 
-                        if (tmp.ToUpper() == "FF")
+                        if (tmp.ToUpperInvariant() == "FF")
                         {
                             CSYDFile csyd = new CSYDFile();
                             csyd.ShowDialog();
@@ -1820,7 +1844,7 @@ Restart:;
         {
             string ver = "6.0010.250526";
             ifhide = false;
-            MessageBox.Show("版本号:" + ver + "\r\n罗晋@BeiJing@20230526");
+            MessageBox.Show("版本号:" + ver + "\r\n罗晋@BeiJing@20230608");
         }
 
         private void 打开OToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2638,7 +2662,7 @@ Restart:;
         public IEnumerable<DriveInfo> GetAllFixedNtfsDrives()
         {
             return DriveInfo.GetDrives()
-                .Where(d => (d.IsReady == true && (d.DriveType == DriveType.Fixed || d.DriveType == DriveType.Removable) && d.DriveFormat.ToUpper() == "NTFS"));//固定磁盘
+                .Where(d => (d.IsReady == true && (d.DriveType == DriveType.Fixed || d.DriveType == DriveType.Removable) && d.DriveFormat.ToUpperInvariant() == "NTFS"));//固定磁盘
         }
 
         public void Execute_Search_Thread()
