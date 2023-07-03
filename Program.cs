@@ -24,6 +24,8 @@ namespace tdsCshapu
         {     
             bool flag = false;
             System.Threading.Mutex hMutex = new System.Threading.Mutex(true, Application.ProductName, out flag);
+            
+            //waitOne可以删除，因为无需考虑资源等待，仅判定是否新建即可
             bool b = hMutex.WaitOne(0, false);
 
             if(!flag)
