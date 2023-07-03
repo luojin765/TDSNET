@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -20,8 +21,7 @@ namespace tdsCshapu
         /// </summary>
         [STAThread]
         static void Main()
-        {
-
+        {     
             bool flag = false;
             System.Threading.Mutex hMutex = new System.Threading.Mutex(true, Application.ProductName, out flag);
             bool b = hMutex.WaitOne(0, false);
@@ -61,7 +61,12 @@ namespace tdsCshapu
 
             Application.Run(form);
         }
-
+        public static bool IsAdministrator()
+        {
+            WindowsIdentity identity = WindowsIdentity.GetCurrent();
+            WindowsPrincipal principal = new WindowsPrincipal(identity);
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
+        }
         static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
             string str = "";

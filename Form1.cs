@@ -1564,12 +1564,26 @@ Restart:;
             mouseY = 0;
         }
 
+        const string StartupPath = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
+        const string TDSNAME = "TDS-LeahyGo";
         private void 开机启动SToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
             try
             {
-                Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).SetValue("TDS-LeahyGo", "\"" + Application.ExecutablePath + "\"");
+                using (var key = Registry.CurrentUser.OpenSubKey(StartupPath, true))
+                {
+                    key?.SetValue(TDSNAME, string.Concat("\"",Application.ExecutablePath,"\""));
+                }
+
+
+                //added but not work
+                //Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).SetValue("TDS-LeahyGo", "\"" + Application.ExecutablePath + "\"");
+
+                //Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).SetValue("TDS-LeahyGo", "\"" + Application.ExecutablePath + "\"");
+                
+                //work as same as without wow6432node
+                //Registry.LocalMachine.OpenSubKey("SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Run", true).SetValue("TDS-LeahyGo", "\"" + Application.ExecutablePath + "\"");
                 ifhide = false;
                 MessageBox.Show("开机启动添加成功.");
             }
