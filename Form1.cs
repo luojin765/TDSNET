@@ -2446,7 +2446,6 @@ Restart:;
 
         public void CompressMem(int mbsize)
         {
-            System.Runtime.GCSettings.LargeObjectHeapCompactionMode = System.Runtime.GCLargeObjectHeapCompactionMode.CompactOnce;
             GC.Collect();
             GC.WaitForPendingFinalizers();
             //try
