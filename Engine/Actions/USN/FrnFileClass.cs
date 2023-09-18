@@ -97,8 +97,6 @@ namespace TDSNET.Engine.Actions.USN
 
     public class FileSys
     {
-        public static List<FrnFileOrigin> vlist = new List<FrnFileOrigin>();
-
         public const int SPLITFILENUMBER = 100000;
         public DriveInfo driveInfo;
         public NtfsUsnJournal ntfsUsnJournal;
@@ -198,7 +196,6 @@ namespace TDSNET.Engine.Actions.USN
                             frn.keyindex = TBS(nacn.AsSpan());
                             frn.parentFrn = files[f.ParentFileReferenceNumber];
                             files.Add(frn.fileReferenceNumber, frn);
-                            vlist.Add(null);
                         }
                     }
 
