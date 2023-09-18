@@ -97,12 +97,11 @@ namespace TDSNET.Engine.Actions.USN
 
     public class FileSys
     {
-        public const int SPLITFILENUMBER = 100000;
         public DriveInfo driveInfo;
         public NtfsUsnJournal ntfsUsnJournal;
         public Dictionary<ulong, FrnFileOrigin> files = new Dictionary<ulong, FrnFileOrigin>();
         public Win32Api.USN_JOURNAL_DATA usnStates;
-        public Collection<ArrayList> SplitedFiles = new Collection<ArrayList>();
+
         public FileSys(DriveInfo dInfo)
         {
             driveInfo = dInfo;
