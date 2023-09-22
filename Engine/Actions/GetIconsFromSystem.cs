@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.IO;
+using System.Threading.Tasks;
+using TDSNET.Engine.Actions.USN;
 
 namespace TDSNET.Engine.Actions
 {
@@ -61,6 +63,14 @@ namespace TDSNET.Engine.Actions
         }
 
         static Dictionary<string, int> iconCache = new Dictionary<string, int>();
+
+        static public async Task FileIconIndexAsync(string AFileName,FrnFileOrigin frnFileOrigin)
+        {
+            await Task.Run(() =>
+            {
+                frnFileOrigin.IcoIndex= FileIconIndex(AFileName);
+            });
+        }
 
         static public int FileIconIndex(string AFileName)
         {

@@ -404,7 +404,7 @@ namespace tdsCshapu
 
                         if (f.IcoIndex != -1)
                         {
-                            f.IcoIndex = IFileHelper.FileIconIndex(@path2);
+                            _ = IFileHelper.FileIconIndexAsync(@path2,f);
                             e.Item = GenerateListViewItem(f, name, path2);
                         }
                         else if (exten.Length == 0)
@@ -417,11 +417,11 @@ namespace tdsCshapu
                         }
                         else if (exten.Equals(".exe", StringComparison.OrdinalIgnoreCase) || exten.Equals(".lnk", StringComparison.OrdinalIgnoreCase))
                         {
-                            int ext = 0;
+                            f.IcoIndex = 0;
+
                             try
                             {
-                                ext = IFileHelper.FileIconIndex(@path2);
-                                f.IcoIndex = ext;
+                                _ = IFileHelper.FileIconIndexAsync(@path2, f);
                             }
                             catch
                             { }
@@ -430,11 +430,10 @@ namespace tdsCshapu
                         }
                         else
                         {
-                            int ext = 0;
+                            f.IcoIndex = 0;
                             try
                             {
-                                ext = IFileHelper.FileIconIndex(exten);//exten
-                                f.IcoIndex = ext;
+                                _ = IFileHelper.FileIconIndexAsync(exten,f);//exten
                             }
                             catch { }
                             e.Item = GenerateListViewItem(f, name, path2);
@@ -2033,11 +2032,10 @@ Restart:;
                             else
                             if (exten.Equals(".exe", StringComparison.OrdinalIgnoreCase) || exten.Equals(".lnk", StringComparison.OrdinalIgnoreCase))
                             {
-                                int ext = 0;
+                                f.IcoIndex = 0;
                                 try
                                 {
-                                    ext = IFileHelper.FileIconIndex(@path2);
-                                    f.IcoIndex = ext;
+                                    _ = IFileHelper.FileIconIndexAsync(@path2,f);
                                 }
                                 catch
                                 { }
@@ -2047,12 +2045,11 @@ Restart:;
                             }
                             else
                             {
-                                int ext = 0;
+                                f.IcoIndex = 0;
 
                                 try
                                 {
-                                    ext = IFileHelper.FileIconIndex(exten);//exten
-                                    f.IcoIndex = ext;
+                                    _ = IFileHelper.FileIconIndexAsync(exten,f);//exten
                                 }
                                 catch { }
                                 CurrentCacheItemsSource[i] = GenerateListViewItem(f, name, path2);
