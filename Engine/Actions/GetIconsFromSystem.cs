@@ -66,21 +66,9 @@ namespace TDSNET.Engine.Actions
 
         static public async Task FileIconIndexAsync(string AFileName,FrnFileOrigin frnFileOrigin)
         {
-            if (frnFileOrigin.IcoIndex > 0)
-            {
-                return;
-            }
-
             await Task.Run(() =>
             {
-                try
-                {
-                    frnFileOrigin.IcoIndex= FileIconIndex(AFileName);
-                }
-                catch
-                {
-
-                }
+                frnFileOrigin.IcoIndex= FileIconIndex(AFileName);
             });
         }
 
