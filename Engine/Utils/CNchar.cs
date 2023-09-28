@@ -9,14 +9,9 @@ namespace TDSNET.Engine.Utils
     {
         public static string GetSpellCodeWithBuffer(ReadOnlySpan<char> CnStr, ConcurrentDictionary<char, char> SpellDict)
         {
-            StringBuilder strTemp = new StringBuilder(256);
+            var strTemp = new char[CnStr.Length];
 
-            strTemp.Clear();
-            int iLen = CnStr.Length;
-
-            int i = 0;
-
-            for (i = 0; i <= iLen - 1; i++)
+            for (var i = 0; i < CnStr.Length; i++)
             {
                 char c = char.ToUpper(CnStr[i]);
 
@@ -27,10 +22,10 @@ namespace TDSNET.Engine.Utils
 
                 if (SpellDict.TryGetValue(c, out char value))
                 {
-                    strTemp.Append(value);
+                    strTemp[i]=(value);
                 }
             }
-            return strTemp.ToString();
+            return new string(strTemp);
         }
 
         public static string GetSpellCode(ReadOnlySpan<char> CnStr, ConcurrentDictionary<char, char> SpellDict = null)
@@ -50,11 +45,7 @@ namespace TDSNET.Engine.Utils
         {
             var strTemp = new char[CnStr.Length];
 
-            int iLen = CnStr.Length;
-
-            int i = 0;
-
-            for (i = 0; i < iLen; i++)
+            for (var i = 0; i < CnStr.Length; i++)
             {
 
                 strTemp[i]=GetCharSpellCode(char.ToUpper(CnStr[i]));

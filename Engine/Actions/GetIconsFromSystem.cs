@@ -65,49 +65,50 @@ namespace TDSNET.Engine.Actions
 
         static public async Task FileIconIndexAsync(string AFileName,FrnFileOrigin frnFileOrigin)
         {
-            await Task.Run(() =>
-            {
-                frnFileOrigin.IcoIndex= FileIconIndex(AFileName);
-            });
-        }        
-
-        private static int FileIconIndex(string AFileName)
-        {
             string exten = Path.GetExtension(AFileName);
+
             if (string.IsNullOrWhiteSpace(exten) || string.IsNullOrWhiteSpace(AFileName))
             {
-                return 0;
+                frnFileOrigin.IcoIndex= 0;
             }
-
 
             if (iconCache.TryGetValue(exten, out int index))
             {
-                return index;
+                frnFileOrigin.IcoIndex = index;
             }
             else
             {
-                try
+                await Task.Run(() =>
                 {
-                    SHFILEINFO vFileInfo = new SHFILEINFO();
-                    IntPtr pSH = SHGetFileInfo(AFileName, 0, ref vFileInfo,
-                    Marshal.SizeOf(vFileInfo), SHGFI_SYSICONINDEX | SHGFI_USEFILEATTRIBUTES);
-                    if (pSH != IntPtr.Zero)
+                    frnFileOrigin.IcoIndex = FileIconIndex(AFileName, exten);
+                });
+            }
+        }        
+
+        private static int FileIconIndex(string AFileName,string exten)
+        {
+            try
+            {
+                SHFILEINFO vFileInfo = new SHFILEINFO();
+                IntPtr pSH = SHGetFileInfo(AFileName, 0, ref vFileInfo,
+                Marshal.SizeOf(vFileInfo), SHGFI_SYSICONINDEX | SHGFI_USEFILEATTRIBUTES);
+                if (pSH != IntPtr.Zero)
+                {
+                    if (!string.Equals(exten,".exe",StringComparison.OrdinalIgnoreCase)
+                        && !string.Equals(exten, ".lnk", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (exten != ".exe" && exten != ".lnk")
-                        {
-                            iconCache.TryAdd(exten, vFileInfo.iIcon);
-                        }
-                        return vFileInfo.iIcon;
+                        iconCache.TryAdd(exten, vFileInfo.iIcon);
                     }
-                    else
-                    {
-                        return 0;
-                    }
+                    return vFileInfo.iIcon;
                 }
-                catch
+                else
                 {
                     return 0;
                 }
+            }
+            catch
+            {
+                return 0;
             }
         }
 

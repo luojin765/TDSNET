@@ -1604,9 +1604,9 @@ Restart:;
 
         private void About()
         {
-            string ver = "6.0010.250526";
+            string ver = "6.0010.20230928";
             ifhide = false;
-            MessageBox.Show("版本号:" + ver + "\r\n罗晋@BeiJing@20230608");
+            MessageBox.Show("版本号:" + ver + "\r\nluojin@BeiJing@20230928");
         }
 
         private void 打开OToolStripMenuItem_Click(object sender, EventArgs e)
