@@ -8,11 +8,10 @@ using System.Windows.Forms;
 using System.IO;
 using System.Threading.Tasks;
 using TDSNET.Engine.Actions.USN;
+using System.Collections.Concurrent;
 
 namespace TDSNET.Engine.Actions
 {
-
-
 
     public static class IFileHelper
     {
@@ -62,7 +61,7 @@ namespace TDSNET.Engine.Actions
 
         }
 
-        static Dictionary<string, int> iconCache = new Dictionary<string, int>();
+        static ConcurrentDictionary<string, int> iconCache = new ConcurrentDictionary<string, int>();
 
         static public async Task FileIconIndexAsync(string AFileName,FrnFileOrigin frnFileOrigin)
         {
@@ -70,9 +69,9 @@ namespace TDSNET.Engine.Actions
             {
                 frnFileOrigin.IcoIndex= FileIconIndex(AFileName);
             });
-        }
+        }        
 
-        static public int FileIconIndex(string AFileName)
+        private static int FileIconIndex(string AFileName)
         {
             string exten = Path.GetExtension(AFileName);
             if (string.IsNullOrWhiteSpace(exten) || string.IsNullOrWhiteSpace(AFileName))
@@ -96,7 +95,7 @@ namespace TDSNET.Engine.Actions
                     {
                         if (exten != ".exe" && exten != ".lnk")
                         {
-                            iconCache.Add(exten, vFileInfo.iIcon);
+                            iconCache.TryAdd(exten, vFileInfo.iIcon);
                         }
                         return vFileInfo.iIcon;
                     }

@@ -178,12 +178,15 @@ namespace tdsCshapu
         [DllImport("shell32.dll", ExactSpelling = true)]
         private static extern int SHOpenFolderAndSelectItems(IntPtr pidlList, uint cild, IntPtr children, uint dwFlags);
 
-        static string GetPath(FrnFileOrigin f)
+        static ReadOnlySpan<char> GetPath(FrnFileOrigin f)
         {
-            string path = StringUtils.GetPathStr(f).ToString();
-            if (path.EndsWith(':'))
+            var path = StringUtils.GetPathStr(f,ReadOnlySpan<char>.Empty);
+            if (path.EndsWith(":".AsSpan(),StringComparison.OrdinalIgnoreCase))
             {
-                return path + "\\";
+                var pathChar = new char[path.Length+1];
+                Array.Copy(path.ToArray(), pathChar, path.Length);
+                pathChar[pathChar.Length-1] = '\\';
+                return pathChar.AsSpan();
             }
             else
             {
@@ -311,11 +314,11 @@ namespace tdsCshapu
 
                         Parallel.ForEach(fs.files.Values, parallelOptions, f =>
                         {
-                            string ext = Path.GetExtension(getfile(f.fileName));
+                            string ext = StringUtils.GetExtension(getfile(f.fileName)).ToString();
 
                             if (string.Equals(ext,".LNK",StringComparison.OrdinalIgnoreCase))
                             {
-                                string path = GetPath(f);
+                                var path = GetPath(f);
                                 if (path.IndexOf(USER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) != -1 || path.IndexOf(ALLUSER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) != -1)
                                 {
                                     f.additionInfo.orderFirst = true;
@@ -389,12 +392,12 @@ namespace tdsCshapu
                 {
 
                     FrnFileOrigin f = vlist[e.ItemIndex];
-                    string name = getfile(f.fileName);
-                    string path2 = GetPath(f);
+                    var name = getfile(f.fileName).ToString();
+                    var path2 = GetPath(f).ToString();
                     string exten = string.Empty;
                     try
                     {
-                        exten = Path.GetExtension(name);
+                        exten = StringUtils.GetExtension(name).ToString();
                     }
                     catch
                     { }
@@ -404,7 +407,7 @@ namespace tdsCshapu
 
                         if (f.IcoIndex != -1)
                         {
-                            _ = IFileHelper.FileIconIndexAsync(@path2,f);
+                            _ = IFileHelper.FileIconIndexAsync(path2,f);
                             e.Item = GenerateListViewItem(f, name, path2);
                         }
                         else if (exten.Length == 0)
@@ -421,7 +424,7 @@ namespace tdsCshapu
 
                             try
                             {
-                                _ = IFileHelper.FileIconIndexAsync(@path2, f);
+                                _ = IFileHelper.FileIconIndexAsync(path2, f);
                             }
                             catch
                             { }
@@ -824,7 +827,7 @@ Restart:;
                     FrnFileOrigin f = (FrnFileOrigin)vlist[istView1.SelectedIndices[0]];
                     if (!(f == null))
                     {
-                        string path = GetPath(f);
+                        string path = GetPath(f).ToString();
                         if (Path.GetExtension(getfile(f.fileName)).Length == 0)
                         {
                             if (Directory.Exists(path))
@@ -909,7 +912,7 @@ Restart:;
                                     //识别
                                     try
                                     {
-                                        path = GetPath(f);
+                                        path = GetPath(f).ToString();
 
                                     }
                                     catch
@@ -920,7 +923,7 @@ Restart:;
                                     }
 
                                     var ext = Path.GetExtension(getfile(f.fileName));
-                                    if (ext?.Length == 0)
+                                    if (ext.Length == 0)
                                     {
                                         if (Directory.Exists(path))
                                         {
@@ -1003,9 +1006,9 @@ Restart:;
                                     string path = string.Empty;
                                     try
                                     {
-                                        path = Path.GetDirectoryName(GetPath(f));
+                                        path = Path.GetDirectoryName(GetPath(f).ToString());
 
-                                        ExplorerFile(GetPath(f));
+                                        ExplorerFile(GetPath(f).ToString());
 
                                         //Process.Start("explorer.exe", path);
                                         UpdateRecord(f);//记录相关* // 
@@ -1025,9 +1028,9 @@ Restart:;
                                 f = (FrnFileOrigin)vlist[x];
                                 if (f != null)
                                 {
-                                    string path = GetPath(f);
+                                    var path = GetPath(f);
                                     UpdateRecord(f);//记录相关* // 
-                                    Copies.Add(path);
+                                    Copies.Add(path.ToString());
 
                                 }
                                 break;
@@ -1036,7 +1039,7 @@ Restart:;
                                 if (f != null)
                                 {
 
-                                    string path = GetPath(f);
+                                    var path = GetPath(f);
                                     UpdateRecord(f); //记录相关* //
                                     pathcopies.Append(path).Append("\r\n");
                                 }
@@ -1047,7 +1050,7 @@ Restart:;
                                 f = (FrnFileOrigin)vlist[x];
                                 if (!(f == null))
                                 {
-                                    string path = GetPath(f);
+                                    var path = GetPath(f).ToString();
                                     try
                                     {
                                         DF(path);
@@ -1076,7 +1079,7 @@ Restart:;
                                 if (!(f == null))
                                 {
 
-                                    string path = Path.GetDirectoryName(GetPath(f));
+                                    string path = Path.GetDirectoryName(GetPath(f).ToString());
                                     UpdateRecord(f); //记录相关* // 
                                     pathcopies.Append(path).Append("\r\n");
                                 }
@@ -1434,7 +1437,7 @@ Restart:;
             {
                 foreach (FrnFileOrigin f in Record)
                 {
-                    string fp = GetPath(f);
+                    string fp = GetPath(f).ToString();
                     if (File.Exists(fp) || Directory.Exists(fp))
                     {
                         fs.WriteLine(string.Concat(f.fileReferenceNumber, "@", f.parentFrn.fileReferenceNumber, "@", f.fileName, "@", 0, "@", f.VolumeName));
@@ -1510,7 +1513,7 @@ Restart:;
                         f = (FrnFileOrigin)vlist[x];
                         if (!(f == null))
                         {
-                            string path = GetPath(f);
+                            string path = GetPath(f).ToString();
                             a.Add(path);
                         }
                     }
@@ -1703,7 +1706,7 @@ Restart:;
                 FrnFileOrigin f = (FrnFileOrigin)vlist[istView1.SelectedIndices[0]];
                 if (!(f == null))
                 {
-                    toolStripTextBox1.Text = getfile(f.fileName);
+                    toolStripTextBox1.Text = getfile(f.fileName).ToString();
                     toolStripTextBox1.Enabled = true; ;
                     打开OToolStripMenuItem.Text = "打开(&O)";
                     打开文件夹DToolStripMenuItem.Text = "打开项目所在文件夹(&D)";
@@ -1731,7 +1734,7 @@ Restart:;
                 FrnFileOrigin f = (FrnFileOrigin)vlist[istView1.SelectedIndices[0]];
                 if (!(f == null))
                 {
-                    string path = GetPath(f);
+                    string path = GetPath(f).ToString();
                     if (Path.GetExtension(getfile(f.fileName)).Length == 0)
                     {
                         if (Directory.Exists(path))
@@ -1786,8 +1789,8 @@ Restart:;
 
                         if (!(f == null))
                         {
-                            string path = GetPath(f);
-                            string pathnew = Path.GetDirectoryName(GetPath(f)) + "\\" + toolStripTextBox1.Text;
+                            string path = GetPath(f).ToString();
+                            string pathnew = Path.GetDirectoryName(GetPath(f).ToString()) + "\\" + toolStripTextBox1.Text;
                             if (Path.GetExtension(getfile(f.fileName)).Length == 0)
                             {
                                 if (Directory.Exists(path))
@@ -1997,8 +2000,8 @@ Restart:;
                 {
 
                     FrnFileOrigin f = vlist[i + firstitem];
-                    string name = getfile(f.fileName);
-                    string path2 = GetPath(f);
+                    string name = getfile(f.fileName).ToString();
+                    string path2 = GetPath(f).ToString();
 
                     if (i >= CurrentCacheItemsSource.Count())
                     {
@@ -2306,16 +2309,16 @@ Restart:;
         /// </summary>
         /// <param name="txt"></param>
         /// <returns></returns>
-        public static string getfile(ReadOnlySpan<char> filename)
+        public static ReadOnlySpan<char> getfile(ReadOnlySpan<char> filename)
         {
             var index1 = filename.IndexOf('|');
-            if (index1 < 0) return string.Empty;
+            if (index1 < 0) return ReadOnlySpan<char>.Empty;
             var filename2 = filename.Slice(index1 + 1, filename.Length - index1 - 1);
 
             var index2 = filename2.IndexOf('|');
             if (index1 < 0)
             {
-                return filename2.ToString();
+                return filename2;
             }
             else
             {

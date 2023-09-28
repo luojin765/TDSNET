@@ -48,19 +48,18 @@ namespace TDSNET.Engine.Utils
 
         public static string GetSpellCodeWithOutBuffer(ReadOnlySpan<char> CnStr)
         {
-            StringBuilder strTemp = new StringBuilder(256);
+            var strTemp = new char[CnStr.Length];
 
-            strTemp.Clear();
             int iLen = CnStr.Length;
 
             int i = 0;
 
-            for (i = 0; i <= iLen - 1; i++)
+            for (i = 0; i < iLen; i++)
             {
 
-                strTemp.Append(GetCharSpellCode(char.ToUpper(CnStr[i])));
+                strTemp[i]=GetCharSpellCode(char.ToUpper(CnStr[i]));
             }
-            return strTemp.ToString();
+            return new string(strTemp);
         }
 
         /// <summary>
@@ -100,149 +99,33 @@ namespace TDSNET.Engine.Utils
 
             // iCnChar match the constant
 
-            if (iCnChar >= 45217 && iCnChar <= 45252)
+            return  iCnChar switch
             {
-
-                return 'A';
-
-            }
-
-            else if (iCnChar >= 45253 && iCnChar <= 45760)
-            {
-
-                return 'B';
-
-            }
-            else if (iCnChar >= 45761 && iCnChar <= 46317)
-            {
-
-                return 'C';
-
-            }
-            else if (iCnChar >= 46318 && iCnChar <= 46825)
-            {
-
-                return 'D';
-
-            }
-            else if (iCnChar >= 46826 && iCnChar <= 47009)
-            {
-
-                return 'E';
-
-            }
-            else if (iCnChar >= 47010 && iCnChar <= 47296)
-            {
-
-                return 'F';
-
-            }
-            else if (iCnChar >= 47297 && iCnChar <= 47613)
-            {
-
-                return 'G';
-
-            }
-            else if (iCnChar >= 47614 && iCnChar <= 48118)
-            {
-
-                return 'H';
-
-            }
-            else if (iCnChar >= 48119 && iCnChar <= 49061)
-            {
-
-                return 'J';
-
-            }
-            else if (iCnChar >= 49062 && iCnChar <= 49323)
-            {
-
-                return 'K';
-
-            }
-            else if (iCnChar >= 49324 && iCnChar <= 49895)
-            {
-
-                return 'L';
-
-            }
-            else if (iCnChar >= 49896 && iCnChar <= 50370)
-            {
-
-                return 'M';
-
-            }
-            else if (iCnChar >= 50371 && iCnChar <= 50613)
-            {
-
-                return 'N';
-
-            }
-            else if (iCnChar >= 50614 && iCnChar <= 50621)
-            {
-
-                return 'O';
-
-            }
-            else if (iCnChar >= 50622 && iCnChar <= 50905)
-            {
-
-                return 'P';
-
-            }
-            else if (iCnChar >= 50906 && iCnChar <= 51386)
-            {
-
-                return 'Q';
-
-            }
-            else if (iCnChar >= 51387 && iCnChar <= 51445)
-            {
-
-                return 'R';
-
-            }
-            else if (iCnChar >= 51446 && iCnChar <= 52217)
-            {
-
-                return 'S';
-
-            }
-            else if (iCnChar >= 52218 && iCnChar <= 52697)
-            {
-
-                return 'T';
-
-            }
-            else if (iCnChar >= 52698 && iCnChar <= 52979)
-            {
-
-                return 'W';
-
-            }
-            else if (iCnChar >= 52980 && iCnChar <= 53688)
-            {
-
-                return 'X';
-
-            }
-            else if (iCnChar >= 53689 && iCnChar <= 54480)
-            {
-
-                return 'Y';
-
-            }
-            else if (iCnChar >= 54481 && iCnChar <= 65289)
-            {
-
-                return 'Z';
-
-            }
-            else
-
-                return CnChar;
-
+                >= 45217 and <= 45252 => 'A',
+                >= 45253 and <= 45760 => 'B',
+                >= 45761 and <= 46317 => 'C',
+                >= 46318 and <= 46825 => 'D',
+                >= 46826 and <= 47009 => 'E',
+                >= 47010 and <= 47296 => 'F',
+                >= 47297 and <= 47613 => 'G',
+                >= 47614 and <= 48118 => 'H',
+                >= 48119 and <= 49061 => 'J',
+                >= 49062 and <= 49323 => 'K',
+                >= 49324 and <= 49895 => 'L',
+                >= 49896 and <= 50370 => 'M',
+                >= 50371 and <= 50613 => 'N',
+                >= 50614 and <= 50621 => 'O',
+                >= 50622 and <= 50905 => 'P',
+                >= 50906 and <= 51386 => 'Q',
+                >= 51387 and <= 51445 => 'R',
+                >= 51446 and <= 52217 => 'S',
+                >= 52218 and <= 52697 => 'T',
+                >= 52698 and <= 52979 => 'W',
+                >= 52980 and <= 53688 => 'X',
+                >= 53689 and <= 54480 => 'Y',
+                >= 54481 and <= 65289 => 'Z', 
+                _=> CnChar
+            };           
         }
     }
 }
