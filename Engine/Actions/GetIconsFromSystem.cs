@@ -9,11 +9,13 @@ using System.IO;
 using System.Threading.Tasks;
 using TDSNET.Engine.Actions.USN;
 using System.Collections.Concurrent;
+using System.Threading.Channels;
+using System.Threading;
 
 namespace TDSNET.Engine.Actions
 {
 
-    public static class IFileHelper
+    public class IFileHelper
     {
         public static uint SHGFI_ICON = 0x100;
         public static uint SHGFI_DISPLAYNAME = 0x200;
@@ -60,10 +62,47 @@ namespace TDSNET.Engine.Actions
             vImageList);
 
         }
+        internal IFileHelper(Action callback)
+        {
+            try
+            {
+                this.callback = callback;
+                //多并发，需要线程池控制
+                ThreadPool.QueueUserWorkItem(IconWork);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("日志初始化异常:" + ex.Message);
+            }
+        }
+
+        Action? callback=null;
+
+        static private readonly Channel<(string,FrnFileOrigin)> buffer = Channel.CreateUnbounded<(string, FrnFileOrigin)>(new UnboundedChannelOptions() { SingleReader = true });
+
 
         static ConcurrentDictionary<string, int> iconCache = new ConcurrentDictionary<string, int>();
 
-        static public async Task FileIconIndexAsync(string AFileName,FrnFileOrigin frnFileOrigin)
+
+        public void FileIconIndexAsync(string AFileName,FrnFileOrigin frnFileOrigin)
+        {
+            buffer.Writer.WriteAsync((AFileName, frnFileOrigin));
+        }
+
+        async void IconWork(object? _)
+        {
+            while (await buffer.Reader.WaitToReadAsync())
+            {
+                while (buffer.Reader.TryRead(out (string, FrnFileOrigin) logContent))
+                {
+                    FileIconIndexWork(logContent.Item1,logContent.Item2);
+                }
+
+                callback?.Invoke();
+            }
+        }
+
+        static private void FileIconIndexWork(string AFileName,FrnFileOrigin frnFileOrigin)
         {
             string exten = Path.GetExtension(AFileName);
 
@@ -78,10 +117,8 @@ namespace TDSNET.Engine.Actions
             }
             else
             {
-                await Task.Run(() =>
-                {
-                    frnFileOrigin.IcoIndex = FileIconIndex(AFileName, exten);
-                });
+            
+                frnFileOrigin.IcoIndex = FileIconIndex(AFileName, exten);
             }
         }        
 

@@ -150,8 +150,12 @@ namespace tdsCshapu
             SetDoubleBuffering(istView1, true);
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             //挂载消息
+            this.IFileHelper = new IFileHelper(()=> { istView1.VirtualListSize = vresultNum; istView1.Invalidate(); });
         }
 
+        
+
+        IFileHelper IFileHelper=null;
         //#region 获取所有用户文件夹
         [DllImport("shfolder.dll", CharSet = CharSet.Auto)]
         private static extern int SHGetFolderPath(IntPtr hwndOwner, int nFolder, IntPtr hToken, int dwFlags, StringBuilder lpszPath);
@@ -407,7 +411,7 @@ namespace tdsCshapu
 
                         if (f.IcoIndex != -1)
                         {
-                            _ = IFileHelper.FileIconIndexAsync(path2,f);
+                            IFileHelper.FileIconIndexAsync(path2,f);
                             e.Item = GenerateListViewItem(f, name, path2);
                         }
                         else if (exten.Length == 0)
@@ -424,7 +428,7 @@ namespace tdsCshapu
 
                             try
                             {
-                                _ = IFileHelper.FileIconIndexAsync(path2, f);
+                                IFileHelper.FileIconIndexAsync(path2, f);
                             }
                             catch
                             { }
@@ -436,7 +440,7 @@ namespace tdsCshapu
                             f.IcoIndex = 0;
                             try
                             {
-                                _ = IFileHelper.FileIconIndexAsync(exten,f);//exten
+                                IFileHelper.FileIconIndexAsync(exten,f);//exten
                             }
                             catch { }
                             e.Item = GenerateListViewItem(f, name, path2);
@@ -1604,7 +1608,7 @@ Restart:;
 
         private void About()
         {
-            string ver = "6.0010.20230928";
+            string ver = "6.0010.20232219";
             ifhide = false;
             MessageBox.Show("版本号:" + ver + "\r\nluojin@BeiJing@20230928");
         }
@@ -2038,7 +2042,7 @@ Restart:;
                                 f.IcoIndex = 0;
                                 try
                                 {
-                                    _ = IFileHelper.FileIconIndexAsync(@path2,f);
+                                    IFileHelper.FileIconIndexAsync(@path2,f);
                                 }
                                 catch
                                 { }
@@ -2052,7 +2056,7 @@ Restart:;
 
                                 try
                                 {
-                                    _ = IFileHelper.FileIconIndexAsync(exten,f);//exten
+                                    IFileHelper.FileIconIndexAsync(exten, f);//exten
                                 }
                                 catch { }
                                 CurrentCacheItemsSource[i] = GenerateListViewItem(f, name, path2);

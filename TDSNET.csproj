@@ -16,7 +16,7 @@
 	  <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
 	  <!--<IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>-->
 	  <ErrorReport>none</ErrorReport>
-	  <Product>TDS 2.0.7.31</Product>
+	  <Product>TDS 2.0.7.32</Product>
 	  <PlatformTarget>x64</PlatformTarget>
 	  <TieredPGO>true</TieredPGO>
 	  <Nullable>enable</Nullable>
