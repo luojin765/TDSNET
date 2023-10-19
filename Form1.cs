@@ -150,7 +150,7 @@ namespace tdsCshapu
             SetDoubleBuffering(istView1, true);
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             //挂载消息
-            this.IFileHelper = new IFileHelper(()=> { istView1.VirtualListSize = vresultNum; istView1.Invalidate(); });
+            this.IFileHelper = new IFileHelper(null);
         }
 
         
@@ -1608,9 +1608,9 @@ Restart:;
 
         private void About()
         {
-            string ver = "6.0010.20232219";
+            string ver = "6.0010.20231018";
             ifhide = false;
-            MessageBox.Show("版本号:" + ver + "\r\nluojin@BeiJing@20230928");
+            MessageBox.Show("版本号:" + ver + "\r\nluojin@BeiJing@2023");
         }
 
         private void 打开OToolStripMenuItem_Click(object sender, EventArgs e)
@@ -1983,9 +1983,11 @@ Restart:;
 
         }
 
+        CacheVirtualItemsEventArgs tempCacheEventArgs;
         private void IstView1_CacheVirtualItems(object sender, CacheVirtualItemsEventArgs e)
         {
 
+            tempCacheEventArgs = e;
 
             if (refcache == false && CurrentCacheItemsSource != null && e.StartIndex >= firstitem && e.EndIndex <= firstitem + CurrentCacheItemsSource.Length)
             {
