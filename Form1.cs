@@ -153,9 +153,24 @@ namespace tdsCshapu
             this.IFileHelper = new IFileHelper(null);
         }
 
-        
+        void refreshCallback()
+        {
+            if (tempCacheEventArgs != null)
+            {
+                Thread.Sleep(500);
+                this.Invoke(() => { 
+                    
+                    IstView1_CacheVirtualItems(istView1, tempCacheEventArgs);
+                    ListView1_RetrieveVirtualItem(istView1, tempRetrieveVirtualItemEventArgs);
 
-        IFileHelper IFileHelper=null;
+
+                    istView1.Invalidate(); });
+            }
+
+        }
+
+
+        IFileHelper IFileHelper =null;
         //#region 获取所有用户文件夹
         [DllImport("shfolder.dll", CharSet = CharSet.Auto)]
         private static extern int SHGetFolderPath(IntPtr hwndOwner, int nFolder, IntPtr hToken, int dwFlags, StringBuilder lpszPath);
@@ -379,8 +394,12 @@ namespace tdsCshapu
 
         }
 
+        RetrieveVirtualItemEventArgs tempRetrieveVirtualItemEventArgs;
+
         private void ListView1_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e)
         {
+
+            tempRetrieveVirtualItemEventArgs = e;
 
             if (CurrentCacheItemsSource != null && Threadrest == false && e.ItemIndex >= firstitem && e.ItemIndex < firstitem + CurrentCacheItemsSource.Length && e.ItemIndex - firstitem < CurrentCacheItemsSource.Length)
             {
@@ -411,7 +430,6 @@ namespace tdsCshapu
 
                         if (f.IcoIndex != -1)
                         {
-                            IFileHelper.FileIconIndexAsync(path2,f);
                             e.Item = GenerateListViewItem(f, name, path2);
                         }
                         else if (exten.Length == 0)
@@ -1608,7 +1626,7 @@ Restart:;
 
         private void About()
         {
-            string ver = "6.0010.20231018";
+            string ver = "8.0.20231116";
             ifhide = false;
             MessageBox.Show("版本号:" + ver + "\r\nluojin@BeiJing@2023");
         }

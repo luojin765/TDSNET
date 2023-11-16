@@ -86,7 +86,16 @@ namespace TDSNET.Engine.Actions
 
         public void FileIconIndexAsync(string AFileName,FrnFileOrigin frnFileOrigin)
         {
-            buffer.Writer.WriteAsync((AFileName, frnFileOrigin));
+            string exten = Path.GetExtension(AFileName);
+            if (iconCache.TryGetValue(exten, out int index))
+            {
+                frnFileOrigin.IcoIndex = index;
+            }
+            else
+            {
+
+                buffer.Writer.WriteAsync((AFileName, frnFileOrigin));
+            }
         }
 
 
@@ -113,15 +122,9 @@ namespace TDSNET.Engine.Actions
                 frnFileOrigin.IcoIndex= 0;
             }
 
-            if (iconCache.TryGetValue(exten, out int index))
-            {
-                frnFileOrigin.IcoIndex = index;
-            }
-            else
-            {
             
                 frnFileOrigin.IcoIndex = FileIconIndex(AFileName, exten);
-            }
+            
         }        
 
         private static int FileIconIndex(string AFileName,string exten)
