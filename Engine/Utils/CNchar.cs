@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text;
@@ -9,23 +10,30 @@ namespace TDSNET.Engine.Utils
     {
         public static string GetSpellCodeWithBuffer(ReadOnlySpan<char> CnStr, ConcurrentDictionary<char, char> SpellDict)
         {
-            var strTemp = new char[CnStr.Length];
-
-            for (var i = 0; i < CnStr.Length; i++)
+            var strTemp = ArrayPool<char>.Shared.Rent(CnStr.Length);
+            try
             {
-                char c = char.ToUpper(CnStr[i]);
 
-                if (!SpellDict.ContainsKey(c))
+                for (var i = 0; i < CnStr.Length; i++)
                 {
-                    SpellDict.TryAdd(c, GetCharSpellCode(c));
-                }
+                    char c = char.ToUpper(CnStr[i]);
 
-                if (SpellDict.TryGetValue(c, out char value))
-                {
-                    strTemp[i]=(value);
+                    if (!SpellDict.ContainsKey(c))
+                    {
+                        SpellDict.TryAdd(c, GetCharSpellCode(c));
+                    }
+
+                    if (SpellDict.TryGetValue(c, out char value))
+                    {
+                        strTemp[i] = (value);
+                    }
                 }
+                return new string(strTemp.AsSpan().Slice(0, CnStr.Length));
             }
-            return new string(strTemp);
+            finally
+            {
+                ArrayPool<char>.Shared.Return(strTemp);
+            }
         }
 
         public static string GetSpellCode(ReadOnlySpan<char> CnStr, ConcurrentDictionary<char, char> SpellDict = null)
@@ -43,14 +51,20 @@ namespace TDSNET.Engine.Utils
 
         public static string GetSpellCodeWithOutBuffer(ReadOnlySpan<char> CnStr)
         {
-            var strTemp = new char[CnStr.Length];
-
-            for (var i = 0; i < CnStr.Length; i++)
+            var strTemp = ArrayPool<char>.Shared.Rent(CnStr.Length);
+            try
             {
+                for (var i = 0; i < CnStr.Length; i++)
+                {
 
-                strTemp[i]=GetCharSpellCode(char.ToUpper(CnStr[i]));
+                    strTemp[i] = GetCharSpellCode(char.ToUpper(CnStr[i]));
+                }
+                return new string(strTemp.AsSpan().Slice(0, CnStr.Length));
             }
-            return new string(strTemp);
+            finally
+            {
+                ArrayPool<char>.Shared.Return(strTemp);
+            }
         }
 
         /// <summary>

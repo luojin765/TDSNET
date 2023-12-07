@@ -1,5 +1,6 @@
 ﻿// Win32Api.cs
 using System;
+using System.Buffers;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -1113,9 +1114,13 @@ namespace TDSNET.Engine.Actions.USN
             int j = 0;
             for (int i = 0; i < ba.Length; i++)
             {
-                string hex = new string(new char[] { hexString[j], hexString[j + 1] });
+                var chars = ArrayPool<char>.Shared.Rent(2);
+                chars[0] = hexString[j];
+                chars[1] = hexString[j+1];
+                string hex = new string(chars.AsSpan().Slice(0, 2));
                 ba[i] = byte.Parse(hex, System.Globalization.NumberStyles.HexNumber);
                 j = j + 2;
+                ArrayPool<char>.Shared.Return(chars);
             }
             return ba;
         }

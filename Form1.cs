@@ -1,4 +1,5 @@
 ﻿using FileContentSearch;
+using FileSync;
 using Microsoft.Win32;
 using System;
 using System.Collections;
@@ -136,10 +137,11 @@ namespace tdsCshapu
         public bool refcache = false;
 
 
-        class tmp{
-            
+        class tmp
+        {
+
             string a;
-        string b;
+            string b;
         }
         public Form1()
         {
@@ -158,19 +160,21 @@ namespace tdsCshapu
             if (tempCacheEventArgs != null)
             {
                 Thread.Sleep(500);
-                this.Invoke(() => { 
-                    
+                this.Invoke(() =>
+                {
+
                     IstView1_CacheVirtualItems(istView1, tempCacheEventArgs);
                     ListView1_RetrieveVirtualItem(istView1, tempRetrieveVirtualItemEventArgs);
 
 
-                    istView1.Invalidate(); });
+                    istView1.Invalidate();
+                });
             }
 
         }
 
 
-        IFileHelper IFileHelper =null;
+        IFileHelper IFileHelper = null;
         //#region 获取所有用户文件夹
         [DllImport("shfolder.dll", CharSet = CharSet.Auto)]
         private static extern int SHGetFolderPath(IntPtr hwndOwner, int nFolder, IntPtr hToken, int dwFlags, StringBuilder lpszPath);
@@ -199,12 +203,12 @@ namespace tdsCshapu
 
         static ReadOnlySpan<char> GetPath(FrnFileOrigin f)
         {
-            var path = StringUtils.GetPathStr(f,ReadOnlySpan<char>.Empty);
-            if (path.EndsWith(":".AsSpan(),StringComparison.OrdinalIgnoreCase))
+            var path = StringUtils.GetPathStr(f, ReadOnlySpan<char>.Empty);
+            if (path.EndsWith(":".AsSpan(), StringComparison.OrdinalIgnoreCase))
             {
-                var pathChar = new char[path.Length+1];
+                var pathChar = new char[path.Length + 1];
                 Array.Copy(path.ToArray(), pathChar, path.Length);
-                pathChar[pathChar.Length-1] = '\\';
+                pathChar[pathChar.Length - 1] = '\\';
                 return pathChar.AsSpan();
             }
             else
@@ -335,7 +339,7 @@ namespace tdsCshapu
                         {
                             string ext = StringUtils.GetExtension(getfile(f.fileName)).ToString();
 
-                            if (string.Equals(ext,".LNK",StringComparison.OrdinalIgnoreCase))
+                            if (string.Equals(ext, ".LNK", StringComparison.OrdinalIgnoreCase))
                             {
                                 var path = GetPath(f);
                                 if (path.IndexOf(USER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) != -1 || path.IndexOf(ALLUSER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) != -1)
@@ -355,7 +359,7 @@ namespace tdsCshapu
 
                 Task.WaitAll(tasks.ToArray());
                 SpellDict = null;
-                
+
                 vlist = new List<FrnFileOrigin>(new FrnFileOrigin[totalcount]);
 
             }
@@ -458,7 +462,7 @@ namespace tdsCshapu
                             f.IcoIndex = 0;
                             try
                             {
-                                IFileHelper.FileIconIndexAsync(exten,f);//exten
+                                IFileHelper.FileIconIndexAsync(exten, f);//exten
                             }
                             catch { }
                             e.Item = GenerateListViewItem(f, name, path2);
@@ -479,7 +483,7 @@ namespace tdsCshapu
             return new ListViewItem(new string[] { name, path }, f.IcoIndex);
         }
 
-        readonly object inputLock=new();
+        readonly object inputLock = new();
 
         private void Keywords_TextChanged(object sender, EventArgs e)
         {
@@ -620,107 +624,107 @@ namespace tdsCshapu
 
 
                     for (int d = 0; d < fileSysList.Count; d++)
+                    {
+                        if (Threadrest) { goto Restart; } //终止标签
+
+                        var fs = fileSysList[d];
+                        var l = fs.files;
+
+                        if (!(l.Values.Count > 0 && Directory.Exists(fs.driveInfo.Name))) continue;
+
+                        if (driverNames != null)
                         {
-                            if (Threadrest) { goto Restart; } //终止标签
-
-                            var fs = fileSysList[d];
-                            var l = fs.files;
-
-                            if (!(l.Values.Count > 0 && Directory.Exists(fs.driveInfo.Name))) continue;
-
-                            if (driverNames != null)
+                            bool driverFound = false;
+                            foreach (string driverName in driverNames)
                             {
-                                bool driverFound = false;
-                                foreach (string driverName in driverNames)
+                                if (string.Equals(driverName, fs.driveInfo.Name[0].ToString(), StringComparison.OrdinalIgnoreCase))
                                 {
-                                    if (string.Equals(driverName,fs.driveInfo.Name[0].ToString(),StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        driverFound = true;
-                                        break;
-                                    }
-                                }
-
-                                if (!driverFound)
-                                {
-                                    continue;
+                                    driverFound = true;
+                                    break;
                                 }
                             }
 
-
-                            var comparisondType = StringComparison.OrdinalIgnoreCase;
-                            var comparisonType = StringComparison.OrdinalIgnoreCase;
-                            if (unidwords == 0)
+                            if (!driverFound)
                             {
-                                comparisondType = StringComparison.Ordinal;
+                                continue;
                             }
-                            if (uniwords == 0)
+                        }
+
+
+                        var comparisondType = StringComparison.OrdinalIgnoreCase;
+                        var comparisonType = StringComparison.OrdinalIgnoreCase;
+                        if (unidwords == 0)
+                        {
+                            comparisondType = StringComparison.Ordinal;
+                        }
+                        if (uniwords == 0)
+                        {
+                            comparisonType = StringComparison.Ordinal;
+                        }
+
+                        foreach (var f in fs.files.Values)
+                        {
+
+                            if (Threadrest) { break; } //终止标签
+
+                            bool Finded = true;
+
+                            if (DoDirectory)
                             {
-                                comparisonType = StringComparison.Ordinal;
-                            }
 
-                            foreach(var f in fs.files.Values)
-                            {
-
-                                if (Threadrest) { break; } //终止标签
-
-                                bool Finded = true;
-
-                                if (DoDirectory)
+                                if (f.parentFrn != null && l.TryGetValue(f.parentFrn.fileReferenceNumber, out FrnFileOrigin dictmp))
                                 {
-
-                                    if (f.parentFrn != null && l.TryGetValue(f.parentFrn.fileReferenceNumber, out FrnFileOrigin dictmp))
+                                    foreach (string key in dwords)
                                     {
-                                        foreach (string key in dwords)
-                                        {
-                                            if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.fileName.IndexOf(key, comparisondType) == -1))
-                                            {
-                                                Finded = false;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Finded = false;
-                                    }
-                                }
-
-                                if (Finded)
-                                {
-                                    foreach (string key in words)
-                                    {
-                                        if (((uniwords | f.keyindex) != f.keyindex) || (f.fileName.IndexOf(key, comparisonType) == -1))
+                                        if (((unidwords | dictmp.keyindex) != dictmp.keyindex) || (dictmp.fileName.IndexOf(key, comparisondType) == -1))
                                         {
                                             Finded = false;
-                                            break;                                         
+                                            break;
                                         }
                                     }
                                 }
-
-                                if (Finded)
+                                else
                                 {
-                                    resultNum++;
-                                    vlist[resultNum - 1] = f;
-
-
-                                    if (findmax != 0 && resultNum > findmax && isAll == false)
-                                    {
-                                        break;
-                                    }
-
-                                    if (resultNum == 200)//提前显示
-                                    {
-                                        vresultNum = resultNum;
-                                        refcache = true;
-                                        istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步                                  
-                                    }
-
+                                    Finded = false;
                                 }
                             }
 
+                            if (Finded)
+                            {
+                                foreach (string key in words)
+                                {
+                                    if (((uniwords | f.keyindex) != f.keyindex) || (f.fileName.IndexOf(key, comparisonType) == -1))
+                                    {
+                                        Finded = false;
+                                        break;
+                                    }
+                                }
+                            }
 
+                            if (Finded)
+                            {
+                                resultNum++;
+                                vlist[resultNum - 1] = f;
+
+
+                                if (findmax != 0 && resultNum > findmax && isAll == false)
+                                {
+                                    break;
+                                }
+
+                                if (resultNum == 200)//提前显示
+                                {
+                                    vresultNum = resultNum;
+                                    refcache = true;
+                                    istView1.BeginInvoke(new System.EventHandler(listupdate), vresultNum);  //必须异步BeginInvoke，不然不同步                                  
+                                }
+
+                            }
                         }
-                    
+
+
+                    }
+
 
                 }
                 catch (Exception ex)
@@ -750,7 +754,7 @@ Restart:;
 
             }
         }
-         
+
 
 
 
@@ -1338,6 +1342,14 @@ Restart:;
                             ClearMemory();
                             return;
                         }
+                        else if (tmp.ToUpperInvariant() == "FS")
+                        {
+                            FileSync.FileSync fs = new FileSync.FileSync();
+                            fs.ShowDialog();
+                            fs.Dispose();
+                            ClearMemory();
+                            return;
+                        }
 
 
                         try
@@ -1597,7 +1609,7 @@ Restart:;
             {
                 using (var key = Registry.CurrentUser.OpenSubKey(StartupPath, true))
                 {
-                    key?.SetValue(TDSNAME, string.Concat("\"",Application.ExecutablePath,"\""));
+                    key?.SetValue(TDSNAME, string.Concat("\"", Application.ExecutablePath, "\""));
                 }
 
 
@@ -1605,7 +1617,7 @@ Restart:;
                 //Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).SetValue("TDS-LeahyGo", "\"" + Application.ExecutablePath + "\"");
 
                 //Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true).SetValue("TDS-LeahyGo", "\"" + Application.ExecutablePath + "\"");
-                
+
                 //work as same as without wow6432node
                 //Registry.LocalMachine.OpenSubKey("SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Run", true).SetValue("TDS-LeahyGo", "\"" + Application.ExecutablePath + "\"");
                 ifhide = false;
@@ -1626,7 +1638,7 @@ Restart:;
 
         private void About()
         {
-            string ver = "8.0.20231116";
+            string ver = "8.0.20231207";
             ifhide = false;
             MessageBox.Show("版本号:" + ver + "\r\nluojin@BeiJing@2023");
         }
@@ -1976,13 +1988,13 @@ Restart:;
         private void 快捷键说明SToolStripMenuItem_Click(object sender, EventArgs e)
         {
             help();
-         
+
         }
 
         private void 关于LToolStripMenuItem_Click(object sender, EventArgs e)
         {
             About();
-           
+
         }
 
         string GetDateFromPath(string path2)
@@ -2062,7 +2074,7 @@ Restart:;
                                 f.IcoIndex = 0;
                                 try
                                 {
-                                    IFileHelper.FileIconIndexAsync(@path2,f);
+                                    IFileHelper.FileIconIndexAsync(@path2, f);
                                 }
                                 catch
                                 { }
@@ -2940,7 +2952,17 @@ Restart:;
         {
             CSYDFile csyd = new CSYDFile();
             csyd.ShowDialog();
+            csyd.Dispose();
             csyd = null;
+            ClearMemory();
+            return;
+        }
+
+        private void 文件同步TToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            FileSync.FileSync fs = new FileSync.FileSync();
+            fs.ShowDialog();
+            fs.Dispose();
             ClearMemory();
             return;
         }

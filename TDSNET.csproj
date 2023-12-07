@@ -58,5 +58,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\FileContent\FileContentSearch\FileContentSearch.csproj" />
+    <ProjectReference Include="..\FileSync\FileSync.csproj" />
   </ItemGroup>
 </Project>

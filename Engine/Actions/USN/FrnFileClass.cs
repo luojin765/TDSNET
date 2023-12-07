@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -226,13 +227,20 @@ namespace TDSNET.Engine.Actions.USN
 
         public static ulong TBS(ReadOnlySpan<char> txt)
         {
-            char[] alph = new char[SCREENCHARNUM];
+            char[] alph = ArrayPool<char>.Shared.Rent(SCREENCHARNUM);
 
-            for (int i = 0; i < SCREENCHARNUM; i++)
+            try
             {
-                if (txt.Contains(alphbet[i])) { alph[i] = POSITIVE; } else { alph[i] = NEGATIVE; }
+                for (int i = 0; i < SCREENCHARNUM; i++)
+                {
+                    if (txt.Contains(alphbet[i])) { alph[i] = POSITIVE; } else { alph[i] = NEGATIVE; }
+                }
+                return Convert.ToUInt64(new string(alph.AsSpan().Slice(0,SCREENCHARNUM)), 2);
             }
-            return Convert.ToUInt64(new string(alph), 2);
+            finally
+            {
+                ArrayPool<char>.Shared.Return(alph);
+            }
         }
     }
 
