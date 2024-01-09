@@ -18,11 +18,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TDSNET;
+using TDSNET.CompareSameFiles;
 using TDSNET.Engine.Actions;
 using TDSNET.Engine.Actions.USN;
 using TDSNET.Engine.Utils;
 using TDSNET.UI;
-using TDSNET.Utils;
 
 
 
@@ -132,6 +132,7 @@ namespace tdsCshapu
         public static Keys HOTK_SHOW = Keys.OemPeriod;
         public static int findmax = 100;  //最大显示数量
         public bool DoUSNupdate = false;
+        public bool ForbidUSNupdate = false;
 
         public bool ifhide = true;
 
@@ -603,7 +604,7 @@ namespace tdsCshapu
 
                 try
                 {
-                    if (DoUSNupdate)
+                    if (DoUSNupdate && !ForbidUSNupdate)
                     {
 
                         for (int i = 0; i < fileSysList.Count; i++)
@@ -1351,11 +1352,23 @@ Restart:;
                             ClearMemory();
                             return;
                         }
-                        else if (tmp.ToUpperInvariant() == "CP")
+                        else if (tmp.ToUpperInvariant()=="CP")
                         {
-                            PickSameFiles.Comparer(fileSysList);
-                            ClearMemory();
-                            return;
+
+                            try
+                            {
+                                ForbidUSNupdate = true;
+                                var win = new StartCompareSameFiles(fileSysList);
+                                win.ShowDialog();
+                                ClearMemory();
+                                return;
+                            }
+                            finally
+                            {
+                                ForbidUSNupdate = false;
+
+                            }
+
                         }
 
 

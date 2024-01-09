@@ -127,7 +127,7 @@ namespace TDSNET.Engine.Actions
             
         }        
 
-        private static int FileIconIndex(string AFileName,string exten)
+        internal static int FileIconIndex(string AFileName,string exten)
         {
             try
             {
