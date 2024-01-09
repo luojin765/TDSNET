@@ -22,6 +22,7 @@ using TDSNET.Engine.Actions;
 using TDSNET.Engine.Actions.USN;
 using TDSNET.Engine.Utils;
 using TDSNET.UI;
+using TDSNET.Utils;
 
 
 
@@ -1347,6 +1348,12 @@ Restart:;
                             FileSync.FileSync fs = new FileSync.FileSync();
                             fs.ShowDialog();
                             fs.Dispose();
+                            ClearMemory();
+                            return;
+                        }
+                        else if (tmp.ToUpperInvariant() == "CP")
+                        {
+                            PickSameFiles.Comparer(fileSysList);
                             ClearMemory();
                             return;
                         }
