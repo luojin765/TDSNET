@@ -905,6 +905,8 @@ Restart:;
             }
         }
 
+        //建立复制文件列表
+        const int MOVE = 7;
         /// <summary>
         /// 访问list中文档
         /// </summary>
@@ -912,8 +914,21 @@ Restart:;
         private void Golistview(int index)
         {
 
-            //建立复制文件列表
+            string moveToDir = string.Empty;
+            if(index== MOVE)
+            {
+                System.Windows.Forms.FolderBrowserDialog dialog = new System.Windows.Forms.FolderBrowserDialog();
 
+                dialog.Description = "请选择要移动到的文件夹";
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    moveToDir = dialog.SelectedPath.TrimEnd('\\');
+                }
+                else
+                {
+                    return;
+                }
+            }
 
 
             if (istView1.SelectedIndices.Count > 0)
@@ -1110,6 +1125,22 @@ Restart:;
                                     string path = Path.GetDirectoryName(GetPath(f).ToString());
                                     UpdateRecord(f); //记录相关* // 
                                     pathcopies.Append(path).Append("\r\n");
+                                }
+                                break;
+                            case MOVE: //移动
+                                f = (FrnFileOrigin)vlist[x];
+                                if (!(f == null))
+                                {
+                                    var path = GetPath(f).ToString();
+                                    try
+                                    {
+                                        MF(path, moveToDir);
+                                    }
+                                    catch(Exception ex)
+                                    {
+                                        ifhide = false;
+                                        MessageBox.Show("文件\r\n" + path + "\r\n移动失败: " + ex.Message);
+                                    }
                                 }
                                 break;
                         }
@@ -1352,7 +1383,7 @@ Restart:;
                             ClearMemory();
                             return;
                         }
-                        else if (tmp.ToUpperInvariant()=="CP")
+                        else if (tmp.ToUpperInvariant() == "CP")
                         {
 
                             try
@@ -1745,11 +1776,11 @@ Restart:;
                 调用系统菜单ToolStripMenuItem.Visible = false;
                 toolStripTextBox1.Text = "已选" + fnum.ToString() + "个项目";
                 toolStripTextBox1.Enabled = false;
-                打开OToolStripMenuItem.Text = "批量打开选定项目(&O)";
-                打开文件夹DToolStripMenuItem.Text = "批量打开选定项目所在文件夹(&D)";
-                复制文件FToolStripMenuItem.Text = "批量复制选定项目(&F)";
+                打开OToolStripMenuItem.Text = "批量打开项目(&O)";
+                打开文件夹DToolStripMenuItem.Text = "批量打开项目所在文件夹(&D)";
+                复制文件FToolStripMenuItem.Text = "批量复制项目(&F)";
                 复制文件路径CToolStripMenuItem.Text = "批量复制路径(&C)";
-                删除文件MToolStripMenuItem.Text = "批量删除该" + fnum.ToString() + "个选定项目(&M)";
+                删除文件MToolStripMenuItem.Text = "批量删除该" + fnum.ToString() + "个项目(&M)";
                 复制文件名NToolStripMenuItem.Text = "批量复制文件名(&N)";
                 复制目录路径EToolStripMenuItem.Text = "批量复制目录路径(&E)";
             }
@@ -1764,11 +1795,10 @@ Restart:;
                     toolStripTextBox1.Enabled = true; ;
                     打开OToolStripMenuItem.Text = "打开(&O)";
                     打开文件夹DToolStripMenuItem.Text = "打开项目所在文件夹(&D)";
-                    复制文件FToolStripMenuItem.Text = "复制该选定项目(&F)";
+                    复制文件FToolStripMenuItem.Text = "复制该项目(&F)";
                     复制文件路径CToolStripMenuItem.Text = "复制路径(&C)";
-                    删除文件MToolStripMenuItem.Text = "删除选定项目(&M)";
+                    删除文件MToolStripMenuItem.Text = "删除项目(&M)";
                     复制文件名NToolStripMenuItem.Text = "复制文件名(&N)";
-
                     复制目录路径EToolStripMenuItem.Text = "复制目录路径(&E)";
                 }
             }
@@ -2654,6 +2684,19 @@ Restart:;
             }
         }
 
+        public void MF(string path,string newPath)
+        {
+            FileAttributes attr = File.GetAttributes(path);
+            if (attr == FileAttributes.Directory)
+            {                
+                MessageBox.Show("暂不支持移动目录");
+            }
+            else
+            {
+                File.Move(path, newPath + '\\' + Path.GetFileName(path));
+            }
+        }
+
 
 
 
@@ -2985,6 +3028,19 @@ Restart:;
             fs.Dispose();
             ClearMemory();
             return;
+        }
+
+        private void 移动到ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Golistview(MOVE);
+            }
+            catch
+            {
+                ifhide = false;
+                MessageBox.Show("目标不存在或缺少权限。");
+            }
         }
     }
 }

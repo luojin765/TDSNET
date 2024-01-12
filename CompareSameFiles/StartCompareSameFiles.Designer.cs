@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             panel1 = new System.Windows.Forms.Panel();
             label2 = new System.Windows.Forms.Label();
             label1 = new System.Windows.Forms.Label();
@@ -36,6 +37,7 @@
             button1 = new System.Windows.Forms.Button();
             splitContainer1 = new System.Windows.Forms.SplitContainer();
             listView2 = new System.Windows.Forms.ListView();
+            columnHeader6 = new System.Windows.Forms.ColumnHeader();
             columnHeader2 = new System.Windows.Forms.ColumnHeader();
             columnHeader1 = new System.Windows.Forms.ColumnHeader();
             columnHeader3 = new System.Windows.Forms.ColumnHeader();
@@ -43,11 +45,18 @@
             listView1 = new System.Windows.Forms.ListView();
             columnHeader4 = new System.Windows.Forms.ColumnHeader();
             columnHeader5 = new System.Windows.Forms.ColumnHeader();
+            contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(components);
+            打开ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            打开目录ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            删除ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            删除其他ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            timer1 = new System.Windows.Forms.Timer(components);
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
+            contextMenuStrip1.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
@@ -127,7 +136,7 @@
             // 
             // listView2
             // 
-            listView2.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { columnHeader2, columnHeader1, columnHeader3 });
+            listView2.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { columnHeader6, columnHeader2, columnHeader1, columnHeader3 });
             listView2.Dock = System.Windows.Forms.DockStyle.Fill;
             listView2.FullRowSelect = true;
             listView2.Location = new System.Drawing.Point(0, 0);
@@ -137,7 +146,12 @@
             listView2.TabIndex = 0;
             listView2.UseCompatibleStateImageBehavior = false;
             listView2.View = System.Windows.Forms.View.Details;
+            listView2.ColumnClick += listView2_ColumnClick;
             listView2.SelectedIndexChanged += listView2_SelectedIndexChanged;
+            // 
+            // columnHeader6
+            // 
+            columnHeader6.Text = "序号";
             // 
             // columnHeader2
             // 
@@ -145,12 +159,10 @@
             // 
             // columnHeader1
             // 
-            columnHeader1.DisplayIndex = 2;
             columnHeader1.Text = "大小";
             // 
             // columnHeader3
             // 
-            columnHeader3.DisplayIndex = 1;
             columnHeader3.Text = "数量";
             // 
             // textBox3
@@ -168,9 +180,9 @@
             // listView1
             // 
             listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] { columnHeader4, columnHeader5 });
+            listView1.ContextMenuStrip = contextMenuStrip1;
             listView1.Dock = System.Windows.Forms.DockStyle.Top;
             listView1.Location = new System.Drawing.Point(0, 0);
-            listView1.MultiSelect = false;
             listView1.Name = "listView1";
             listView1.Size = new System.Drawing.Size(658, 539);
             listView1.TabIndex = 0;
@@ -187,6 +199,47 @@
             // 
             columnHeader5.Text = "路径";
             // 
+            // contextMenuStrip1
+            // 
+            contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { 打开ToolStripMenuItem, 打开目录ToolStripMenuItem, 删除ToolStripMenuItem, 删除其他ToolStripMenuItem });
+            contextMenuStrip1.Name = "contextMenuStrip1";
+            contextMenuStrip1.Size = new System.Drawing.Size(125, 92);
+            contextMenuStrip1.Opening += contextMenuStrip1_Opening;
+            // 
+            // 打开ToolStripMenuItem
+            // 
+            打开ToolStripMenuItem.Name = "打开ToolStripMenuItem";
+            打开ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            打开ToolStripMenuItem.Text = "打开";
+            打开ToolStripMenuItem.Click += 打开ToolStripMenuItem_Click;
+            // 
+            // 打开目录ToolStripMenuItem
+            // 
+            打开目录ToolStripMenuItem.Name = "打开目录ToolStripMenuItem";
+            打开目录ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            打开目录ToolStripMenuItem.Text = "打开目录";
+            打开目录ToolStripMenuItem.Click += 打开目录ToolStripMenuItem_Click;
+            // 
+            // 删除ToolStripMenuItem
+            // 
+            删除ToolStripMenuItem.Name = "删除ToolStripMenuItem";
+            删除ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            删除ToolStripMenuItem.Text = "删除";
+            删除ToolStripMenuItem.Click += 删除ToolStripMenuItem_Click;
+            // 
+            // 删除其他ToolStripMenuItem
+            // 
+            删除其他ToolStripMenuItem.Name = "删除其他ToolStripMenuItem";
+            删除其他ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            删除其他ToolStripMenuItem.Text = "删除其他";
+            删除其他ToolStripMenuItem.Visible = false;
+            // 
+            // timer1
+            // 
+            timer1.Enabled = true;
+            timer1.Interval = 500;
+            timer1.Tick += timer1_Tick;
+            // 
             // StartCompareSameFiles
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
@@ -195,7 +248,7 @@
             Controls.Add(splitContainer1);
             Controls.Add(panel1);
             Name = "StartCompareSameFiles";
-            Text = "StartCompareSameFiles";
+            Text = "就绪";
             Load += StartCompareSameFiles_Load;
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
@@ -204,6 +257,7 @@
             splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
+            contextMenuStrip1.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -224,5 +278,12 @@
         private System.Windows.Forms.ColumnHeader columnHeader3;
         private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.ColumnHeader columnHeader5;
+        private System.Windows.Forms.ColumnHeader columnHeader6;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem 打开ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 打开目录ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 删除ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 删除其他ToolStripMenuItem;
+        private System.Windows.Forms.Timer timer1;
     }
 }

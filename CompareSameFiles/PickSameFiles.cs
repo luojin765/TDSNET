@@ -47,25 +47,34 @@ namespace TDSNET.CompareSameFiles
             }
         }
 
-        internal static ConcurrentBag<SameFileInfo> Comparer(IList<FileSys> fileSystems,string formatFilter,long minimalSize)
+      
+        internal static ConcurrentBag<SameFileInfo> Comparer(IList<FileSys> fileSystems,string formatFilter,long minimalSize,Action<string> action)
         {
             if (minimalSize < 1)
             {
                 minimalSize = 1024;
             }
 
-            formatFilter = '.' + formatFilter.TrimStart('.');
+            formatFilter =formatFilter.TrimStart('.');
+            var filters = formatFilter.Replace(" ", "").Split('|');
+            for(int k = 0; k < filters.Length; k++)
+            {
+                filters[k] = '.' + filters[k].TrimStart('.');
+            }
 
             ConcurrentDictionary<long, ConcurrentBag<FrnFileOrigin>> sameFile = new();
-            int i = 0;
+            int currentFileCount = 0;
+            int total = fileSystems.Sum(o => o.files.Count);
+
             Parallel.ForEach(fileSystems, fileSys =>
             { 
                     Parallel.ForEach(fileSys.files.Values, file =>
                         {
+                            Interlocked.Increment(ref currentFileCount);
+
                             var filePath = GetPath(file);
                             long fileSize = 0;
 
-                            var filters = formatFilter.Replace(" ", "").Split('|');
                             var extension = Path.GetExtension(filePath.ToString());
                             foreach (var filter in filters)
                             {
@@ -96,15 +105,22 @@ namespace TDSNET.CompareSameFiles
                             {
                                 sameFile.TryAdd(fileSize, new ConcurrentBag<FrnFileOrigin> { file });
                             }
-                            Interlocked.Increment(ref i);
-                            if (i % 100 == 0) Debug.WriteLine(i);
+
+
+                            if (currentFileCount % 100 == 0)
+                            {
+                                action?.Invoke((currentFileCount/(double)total*100).ToString("F2")+"%");
+                                //processMessage.Text = currentFileCount.ToString();
+                            }
                         });
             });
+            action?.Invoke("100%");
 
             ConcurrentBag<SameFileInfo> sameFiles = new ConcurrentBag<SameFileInfo>();
+            action?.Invoke("分析中");
 
             //Parallel.ForEach(sameFile, sf =>
-            foreach(var sf in sameFile)
+            foreach (var sf in sameFile)
             {
                 if (sf.Value.Count < 2)
                 {
@@ -119,6 +135,8 @@ namespace TDSNET.CompareSameFiles
                 }
             }
             //);
+
+            action?.Invoke("完成");
             return sameFiles;
         }
       
@@ -162,8 +180,8 @@ namespace TDSNET.CompareSameFiles
                         try
                         {
                             using var fs2 = new FileStream(path2.ToString(), FileMode.Open);
-
-                            if (FileCompare.CompareByReadOnlySpan(fs1, fs2))
+                            var task = Task.Run(()=>FileCompare.CompareByReadOnlySpan(fs1, fs2)).GetAwaiter().GetResult();
+                            if (task)
                             {
                                 samplefile.Add(files[j], path2);
                                 files[j] = null;
