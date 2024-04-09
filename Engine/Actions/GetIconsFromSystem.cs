@@ -84,7 +84,7 @@ namespace TDSNET.Engine.Actions
         static ConcurrentDictionary<string, int> iconCache = new ConcurrentDictionary<string, int>();
 
 
-        public void FileIconIndexAsync(string AFileName,FrnFileOrigin frnFileOrigin)
+        public void GetFileIconIndexAsync(string AFileName,FrnFileOrigin frnFileOrigin)
         {
             string exten = Path.GetExtension(AFileName);
             if (iconCache.TryGetValue(exten, out int index))
@@ -106,14 +106,14 @@ namespace TDSNET.Engine.Actions
             {
                 while (buffer.Reader.TryRead(out (string, FrnFileOrigin) logContent))
                 {
-                    FileIconIndexWork(logContent.Item1,logContent.Item2);
+                    GetFileIconIndex(logContent.Item1,logContent.Item2);
                 }
 
                 callback?.Invoke();
             }
         }
 
-        static private void FileIconIndexWork(string AFileName,FrnFileOrigin frnFileOrigin)
+        public void GetFileIconIndex(string AFileName,FrnFileOrigin frnFileOrigin)
         {
             string exten = Path.GetExtension(AFileName);
 

@@ -23,6 +23,7 @@ using TDSNET.Engine.Actions;
 using TDSNET.Engine.Actions.USN;
 using TDSNET.Engine.Utils;
 using TDSNET.UI;
+using TDSNET.Utils;
 
 
 
@@ -75,7 +76,7 @@ namespace tdsCshapu
         List<FrnFileOrigin> vlist = new List<FrnFileOrigin>(500);
 
         //listview 绑定
-        List<FrnFileOrigin> Record = new List<FrnFileOrigin>() { };
+        List<FrnFileOrigin> Records = new List<FrnFileOrigin>() { };
 
         private ListViewItem[] CurrentCacheItemsSource;
 
@@ -203,21 +204,6 @@ namespace tdsCshapu
         [DllImport("shell32.dll", ExactSpelling = true)]
         private static extern int SHOpenFolderAndSelectItems(IntPtr pidlList, uint cild, IntPtr children, uint dwFlags);
 
-        static ReadOnlySpan<char> GetPath(FrnFileOrigin f)
-        {
-            var path = StringUtils.GetPathStr(f, ReadOnlySpan<char>.Empty);
-            if (path.EndsWith(":".AsSpan(), StringComparison.OrdinalIgnoreCase))
-            {
-                var pathChar = new char[path.Length + 1];
-                Array.Copy(path.ToArray(), pathChar, path.Length);
-                pathChar[pathChar.Length - 1] = '\\';
-                return pathChar.AsSpan();
-            }
-            else
-            {
-                return path;
-            }
-        }
 
         private void ESCPress()
         {
@@ -339,11 +325,11 @@ namespace tdsCshapu
 
                         Parallel.ForEach(fs.files.Values, parallelOptions, f =>
                         {
-                            string ext = StringUtils.GetExtension(getfile(f.fileName)).ToString();
+                            string ext = StringUtils.GetExtension(PathHelper.getfilePath(f.fileName)).ToString();
 
                             if (string.Equals(ext, ".LNK", StringComparison.OrdinalIgnoreCase))
                             {
-                                var path = GetPath(f);
+                                var path = PathHelper.GetPath(f);
                                 if (path.IndexOf(USER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) != -1 || path.IndexOf(ALLUSER_PROGRAM_PATH, StringComparison.OrdinalIgnoreCase) != -1)
                                 {
                                     f.additionInfo.orderFirst = true;
@@ -392,6 +378,37 @@ namespace tdsCshapu
             Keywords.Focus();
 
             ShowRecord();  //启动完毕展示记录
+
+            PreCacheDefaultIcons();//预先进行指定图标缓存
+        }
+
+        private void PreCacheDefaultIcons()
+        {
+
+            var frnTemp = FrnFileOrigin.Create("", '\0', 0, 0);
+            //指定预缓存特定扩展名
+            string[] tempExten =
+                [".doc", ".docx",
+                ".xls", ".xlsx",
+                ".pdf", ".txt",
+                ".zip",".rar",
+                ".dll",".png",
+                ".jpg",".bmp",
+                ".log",".html",
+                ".ppt",".pptx"
+                ];
+            foreach (var ex in tempExten)
+            {
+                IFileHelper.GetFileIconIndex(ex, frnTemp);
+            }
+
+            if (Records.Count > 0)
+            {
+                foreach (var rec in Records)
+                {
+
+                }
+            }
         }
 
         private void ShowStatuesInfo(string msg)
@@ -421,8 +438,8 @@ namespace tdsCshapu
                 {
 
                     FrnFileOrigin f = vlist[e.ItemIndex];
-                    var name = getfile(f.fileName).ToString();
-                    var path2 = GetPath(f).ToString();
+                    var name = PathHelper.getfilePath(f.fileName).ToString();
+                    var path2 = PathHelper.GetPath(f).ToString();
                     string exten = string.Empty;
                     try
                     {
@@ -452,7 +469,7 @@ namespace tdsCshapu
 
                             try
                             {
-                                IFileHelper.FileIconIndexAsync(path2, f);
+                                IFileHelper.GetFileIconIndexAsync(path2, f);
                             }
                             catch
                             { }
@@ -464,7 +481,7 @@ namespace tdsCshapu
                             f.IcoIndex = 0;
                             try
                             {
-                                IFileHelper.FileIconIndexAsync(exten, f);//exten
+                                IFileHelper.GetFileIconIndexAsync(exten, f);//exten
                             }
                             catch { }
                             e.Item = GenerateListViewItem(f, name, path2);
@@ -855,8 +872,8 @@ Restart:;
                     FrnFileOrigin f = (FrnFileOrigin)vlist[istView1.SelectedIndices[0]];
                     if (!(f == null))
                     {
-                        string path = GetPath(f).ToString();
-                        if (Path.GetExtension(getfile(f.fileName)).Length == 0)
+                        string path = PathHelper.GetPath(f).ToString();
+                        if (Path.GetExtension(PathHelper.getfilePath(f.fileName)).Length == 0)
                         {
                             if (Directory.Exists(path))
                             {
@@ -955,7 +972,7 @@ Restart:;
                                     //识别
                                     try
                                     {
-                                        path = GetPath(f).ToString();
+                                        path = PathHelper.GetPath(f).ToString();
 
                                     }
                                     catch
@@ -965,7 +982,7 @@ Restart:;
                                         break;
                                     }
 
-                                    var ext = Path.GetExtension(getfile(f.fileName));
+                                    var ext = Path.GetExtension(PathHelper.getfilePath(f.fileName));
                                     if (ext.Length == 0)
                                     {
                                         if (Directory.Exists(path))
@@ -1049,9 +1066,9 @@ Restart:;
                                     string path = string.Empty;
                                     try
                                     {
-                                        path = Path.GetDirectoryName(GetPath(f).ToString());
+                                        path = Path.GetDirectoryName(PathHelper.GetPath(f).ToString());
 
-                                        ExplorerFile(GetPath(f).ToString());
+                                        ExplorerFile(PathHelper.GetPath(f).ToString());
 
                                         //Process.Start("explorer.exe", path);
                                         UpdateRecord(f);//记录相关* // 
@@ -1071,7 +1088,7 @@ Restart:;
                                 f = (FrnFileOrigin)vlist[x];
                                 if (f != null)
                                 {
-                                    var path = GetPath(f);
+                                    var path = PathHelper.GetPath(f);
                                     UpdateRecord(f);//记录相关* // 
                                     Copies.Add(path.ToString());
 
@@ -1082,7 +1099,7 @@ Restart:;
                                 if (f != null)
                                 {
 
-                                    var path = GetPath(f);
+                                    var path = PathHelper.GetPath(f);
                                     UpdateRecord(f); //记录相关* //
                                     pathcopies.Append(path).Append("\r\n");
                                 }
@@ -1093,7 +1110,7 @@ Restart:;
                                 f = (FrnFileOrigin)vlist[x];
                                 if (!(f == null))
                                 {
-                                    var path = GetPath(f).ToString();
+                                    var path = PathHelper.GetPath(f).ToString();
                                     try
                                     {
                                         DF(path);
@@ -1114,7 +1131,7 @@ Restart:;
 
 
                                     UpdateRecord(f);
-                                    pathcopies.Append(getfile(f.fileName)).Append("\r\n");
+                                    pathcopies.Append(PathHelper.getfilePath(f.fileName)).Append("\r\n");
                                 }
                                 break;
                             case 6:
@@ -1122,7 +1139,7 @@ Restart:;
                                 if (!(f == null))
                                 {
 
-                                    string path = Path.GetDirectoryName(GetPath(f).ToString());
+                                    string path = Path.GetDirectoryName(PathHelper.GetPath(f).ToString());
                                     UpdateRecord(f); //记录相关* // 
                                     pathcopies.Append(path).Append("\r\n");
                                 }
@@ -1131,7 +1148,7 @@ Restart:;
                                 f = (FrnFileOrigin)vlist[x];
                                 if (!(f == null))
                                 {
-                                    var path = GetPath(f).ToString();
+                                    var path = PathHelper.GetPath(f).ToString();
                                     try
                                     {
                                         MF(path, moveToDir);
@@ -1439,20 +1456,20 @@ Restart:;
         {
 
 
-            if (Record.Count > 0)
+            if (Records.Count > 0)
             {
-                while (Record.Count > 100)
+                while (Records.Count > 100)
                 {
-                    Record.RemoveAt(Record.Count - 1);
+                    Records.RemoveAt(Records.Count - 1);
                 }
 
 
-                vresultNum = Record.Count;
+                vresultNum = Records.Count;
 
                 //this.BeginInvoke(new dosize(Sizecalc), Record.Count);
-                for (int i = 0; i < Record.Count; i++)
+                for (int i = 0; i < Records.Count; i++)
                 {
-                    vlist[i] = Record[i];
+                    vlist[i] = Records[i];
                 }
                 this.BeginInvoke(new System.EventHandler(Recordupdate), vresultNum);  //异步invoke
 
@@ -1472,14 +1489,14 @@ Restart:;
         private void UpdateRecord(FrnFileOrigin targ)
         {
             bool existed = false;
-            if (Record.Count > 0)
+            if (Records.Count > 0)
             {
-                for (int i = 0; i < Record.Count; i++)
+                for (int i = 0; i < Records.Count; i++)
                 {
-                    if ((Record[i].fileReferenceNumber == targ.fileReferenceNumber) || (Record[i].parentFrn == targ.parentFrn && Record[i].fileName == targ.fileName))
+                    if ((Records[i].fileReferenceNumber == targ.fileReferenceNumber) || (Records[i].parentFrn == targ.parentFrn && Records[i].fileName == targ.fileName))
                     {
-                        Record[i].fileReferenceNumber = targ.fileReferenceNumber;
-                        Record[i].fileName = targ.fileName;
+                        Records[i].fileReferenceNumber = targ.fileReferenceNumber;
+                        Records[i].fileName = targ.fileName;
 
                         existed = true;
 
@@ -1489,7 +1506,7 @@ Restart:;
             }
             if (existed == false)
             {
-                Record.Add((FrnFileOrigin)targ);
+                Records.Add((FrnFileOrigin)targ);
             }
 
 
@@ -1520,9 +1537,9 @@ Restart:;
             //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             using (StreamWriter fs = new StreamWriter(path, false, System.Text.Encoding.GetEncoding("gb2312")))
             {
-                foreach (FrnFileOrigin f in Record)
+                foreach (FrnFileOrigin f in Records)
                 {
-                    string fp = GetPath(f).ToString();
+                    string fp = PathHelper.GetPath(f).ToString();
                     if (File.Exists(fp) || Directory.Exists(fp))
                     {
                         fs.WriteLine(string.Concat(f.fileReferenceNumber, "@", f.parentFrn.fileReferenceNumber, "@", f.fileName, "@", 0, "@", f.VolumeName));
@@ -1544,7 +1561,7 @@ Restart:;
                     // Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                     using (StreamReader fs = new StreamReader(path, System.Text.Encoding.GetEncoding("gb2312")))
                     {
-                        Record.Clear();
+                        Records.Clear();
                         while (!fs.EndOfStream)
                         {
                             try
@@ -1556,7 +1573,7 @@ Restart:;
 
                                     if ((fileSysList[int.Parse(KeyValue[3])].files.TryGetValue(UInt64.Parse(KeyValue[0]), out FrnFileOrigin f)))
                                     {
-                                        Record.Add(f as FrnFileOrigin);
+                                        Records.Add(f as FrnFileOrigin);
                                     }
                                 }
                             }
@@ -1598,7 +1615,7 @@ Restart:;
                         f = (FrnFileOrigin)vlist[x];
                         if (!(f == null))
                         {
-                            string path = GetPath(f).ToString();
+                            string path = PathHelper.GetPath(f).ToString();
                             a.Add(path);
                         }
                     }
@@ -1791,7 +1808,7 @@ Restart:;
                 FrnFileOrigin f = (FrnFileOrigin)vlist[istView1.SelectedIndices[0]];
                 if (!(f == null))
                 {
-                    toolStripTextBox1.Text = getfile(f.fileName).ToString();
+                    toolStripTextBox1.Text = PathHelper.getfilePath(f.fileName).ToString();
                     toolStripTextBox1.Enabled = true; ;
                     打开OToolStripMenuItem.Text = "打开(&O)";
                     打开文件夹DToolStripMenuItem.Text = "打开项目所在文件夹(&D)";
@@ -1818,8 +1835,8 @@ Restart:;
                 FrnFileOrigin f = (FrnFileOrigin)vlist[istView1.SelectedIndices[0]];
                 if (!(f == null))
                 {
-                    string path = GetPath(f).ToString();
-                    if (Path.GetExtension(getfile(f.fileName)).Length == 0)
+                    string path = PathHelper.GetPath(f).ToString();
+                    if (Path.GetExtension(PathHelper.getfilePath(f.fileName)).Length == 0)
                     {
                         if (Directory.Exists(path))
                         {
@@ -1865,7 +1882,7 @@ Restart:;
             {
 
                 FrnFileOrigin f = (FrnFileOrigin)vlist[istView1.SelectedIndices[0]];
-                if (toolStripTextBox1.Text != getfile(f.fileName))
+                if (toolStripTextBox1.Text != PathHelper.getfilePath(f.fileName))
                 {
                     ifhide = false;
                     if (MessageBox.Show("是否重命名?", "重命名", MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK)
@@ -1873,9 +1890,9 @@ Restart:;
 
                         if (!(f == null))
                         {
-                            string path = GetPath(f).ToString();
-                            string pathnew = Path.GetDirectoryName(GetPath(f).ToString()) + "\\" + toolStripTextBox1.Text;
-                            if (Path.GetExtension(getfile(f.fileName)).Length == 0)
+                            string path = PathHelper.GetPath(f).ToString();
+                            string pathnew = Path.GetDirectoryName(PathHelper.GetPath(f).ToString()) + "\\" + toolStripTextBox1.Text;
+                            if (Path.GetExtension(PathHelper.getfilePath(f.fileName)).Length == 0)
                             {
                                 if (Directory.Exists(path))
                                 {
@@ -2086,8 +2103,8 @@ Restart:;
                 {
 
                     FrnFileOrigin f = vlist[i + firstitem];
-                    string name = getfile(f.fileName).ToString();
-                    string path2 = GetPath(f).ToString();
+                    string name = PathHelper.getfilePath(f.fileName).ToString();
+                    string path2 = PathHelper.GetPath(f).ToString();
 
                     if (i >= CurrentCacheItemsSource.Count())
                     {
@@ -2124,7 +2141,7 @@ Restart:;
                                 f.IcoIndex = 0;
                                 try
                                 {
-                                    IFileHelper.FileIconIndexAsync(@path2, f);
+                                    IFileHelper.GetFileIconIndexAsync(@path2, f);
                                 }
                                 catch
                                 { }
@@ -2138,7 +2155,7 @@ Restart:;
 
                                 try
                                 {
-                                    IFileHelper.FileIconIndexAsync(exten, f);//exten
+                                    IFileHelper.GetFileIconIndexAsync(exten, f);//exten
                                 }
                                 catch { }
                                 CurrentCacheItemsSource[i] = GenerateListViewItem(f, name, path2);
@@ -2390,31 +2407,7 @@ Restart:;
         //[DllImport("kernel32.dll", EntryPoint = "VirtualLock")]
         //public static extern bool VirtualLock(IntPtr process, int maxSize);
 
-        /// <summary>
-        ///  二进制转换逻辑搜索使用
-        /// </summary>
-        /// <param name="txt"></param>
-        /// <returns></returns>
-        public static ReadOnlySpan<char> getfile(ReadOnlySpan<char> filename)
-        {
-            var index1 = filename.IndexOf('|');
-            if (index1 < 0) return ReadOnlySpan<char>.Empty;
-            var filename2 = filename.Slice(index1 + 1, filename.Length - index1 - 1);
-
-            var index2 = filename2.IndexOf('|');
-            if (index1 < 0)
-            {
-                return filename2;
-            }
-            else
-            {
-                return filename2.Slice(0, index2).ToString();
-            }
-
-            //if (filename.Length > 0) { string[] fn = filename.ToString().Split('|'); if (fn.GetUpperBound(0) > 0) { return fn[1]; } }
-
-
-        }
+        
 
 
 
