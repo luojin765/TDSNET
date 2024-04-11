@@ -155,7 +155,6 @@ namespace tdsCshapu
             SetDoubleBuffering(istView1, true);
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             //挂载消息
-            this.IFileHelper = new IFileHelper(null);
         }
 
         void refreshCallback()
@@ -177,7 +176,7 @@ namespace tdsCshapu
         }
 
 
-        IFileHelper IFileHelper = null;
+        IFileHelper IFileHelper = PathHelper.IFileHelper;
         //#region 获取所有用户文件夹
         [DllImport("shfolder.dll", CharSet = CharSet.Auto)]
         private static extern int SHGetFolderPath(IntPtr hwndOwner, int nFolder, IntPtr hToken, int dwFlags, StringBuilder lpszPath);
@@ -406,7 +405,7 @@ namespace tdsCshapu
             {
                 foreach (var rec in Records)
                 {
-
+                    rec.UpdateIconIndex();
                 }
             }
         }

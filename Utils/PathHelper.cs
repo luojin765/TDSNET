@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using TDSNET.Engine.Actions;
 using TDSNET.Engine.Actions.USN;
 using TDSNET.Engine.Utils;
 
@@ -11,6 +12,10 @@ namespace TDSNET.Utils
 {
     static internal class PathHelper
     {
+        static IFileHelper iFileHelper = new IFileHelper(null);
+
+        public static IFileHelper IFileHelper { get => iFileHelper; }
+
         /// <summary>
         ///  二进制转换逻辑搜索使用
         /// </summary>

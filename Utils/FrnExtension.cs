@@ -10,17 +10,21 @@ using TDSNET.Engine.Utils;
 
 namespace TDSNET.Utils
 {
-    static internal class FrnExtension
+     internal static class FrnExtension
     {
         internal static void UpdateIconIndex(this FrnFileOrigin frnFileOrigin)
         {
-
+            GetIconTargetPathOrExtent(frnFileOrigin, out var fileName, out var index);
+            if (index >= 0)
+            {
+                frnFileOrigin.IcoIndex = index;
+            }
+            else
+            {
+                PathHelper.IFileHelper.GetFileIconIndex(fileName, frnFileOrigin);
+            }
         }
-
-        internal static void UpdateIconIndexAsync(this FrnFileOrigin frnFileOrigin)
-        {
-
-        }
+               
 
         internal static void GetIconTargetPathOrExtent(FrnFileOrigin f, out string pathOrExten, out int index)
         {

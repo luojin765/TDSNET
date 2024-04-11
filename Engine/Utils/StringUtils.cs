@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using TDSNET.Engine.Actions.USN;
+using TDSNET.Utils;
 
 namespace TDSNET.Engine.Utils
 {
@@ -16,7 +17,7 @@ namespace TDSNET.Engine.Utils
             {
                 //尾递归
 
-                tailStr = string.Concat("\\", tdsCshapu.Form1.getfile(f.fileName), tailStr).AsSpan();
+                tailStr = string.Concat("\\", PathHelper.getfilePath(f.fileName), tailStr).AsSpan();
                 return GetPathStr(f.parentFrn, tailStr);
             }
             else
