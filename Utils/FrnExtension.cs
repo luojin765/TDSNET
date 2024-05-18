@@ -14,6 +14,11 @@ namespace TDSNET.Utils
     {
         internal static void UpdateIconIndex(this FrnFileOrigin frnFileOrigin)
         {
+            if (frnFileOrigin.IcoIndex > 0)
+            {
+                return;
+            }
+
             GetIconTargetPathOrExtent(frnFileOrigin, out var fileName, out var index);
             if (index >= 0)
             {
@@ -34,7 +39,6 @@ namespace TDSNET.Utils
 
             if (f.IcoIndex != -1)
             {
-                var path2 = PathHelper.GetPath(f).ToString();                
                 return;
             }
 
@@ -52,13 +56,8 @@ namespace TDSNET.Utils
                 index = 3;
             }
             else if (pathOrExten.Equals(".exe", StringComparison.OrdinalIgnoreCase) || pathOrExten.Equals(".lnk", StringComparison.OrdinalIgnoreCase))
-            {
-                index = 0;
+            {                
                 pathOrExten = PathHelper.GetPath(f).ToString();
-            }
-            else
-            {
-                index= 0;                
             }
         }
     }
