@@ -1,6 +1,4 @@
-﻿using FileContentSearch;
-using FileSync;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -18,7 +16,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using TDSNET;
-using TDSNET.CompareSameFiles;
 using TDSNET.Engine.Actions;
 using TDSNET.Engine.Actions.USN;
 using TDSNET.Engine.Utils;
@@ -1383,41 +1380,7 @@ Restart:;
                     {
                         string tmp = Keywords.Text.Trim();
 
-                        if (tmp.ToUpperInvariant() == "FF")
-                        {
-                            CSYDFile csyd = new CSYDFile();
-                            csyd.ShowDialog();
-                            csyd = null;
-                            ClearMemory();
-                            return;
-                        }
-                        else if (tmp.ToUpperInvariant() == "FS")
-                        {
-                            FileSync.FileSync fs = new FileSync.FileSync();
-                            fs.ShowDialog();
-                            fs.Dispose();
-                            ClearMemory();
-                            return;
-                        }
-                        else if (tmp.ToUpperInvariant() == "CP")
-                        {
-
-                            try
-                            {
-                                ForbidUSNupdate = true;
-                                var win = new StartCompareSameFiles(fileSysList);
-                                win.ShowDialog();
-                                ClearMemory();
-                                return;
-                            }
-                            finally
-                            {
-                                ForbidUSNupdate = false;
-
-                            }
-
-                        }
-
+                        
 
                         try
                         {
@@ -3003,25 +2966,7 @@ Restart:;
         #endregion
 
 
-        private void 文件内容查询FToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            CSYDFile csyd = new CSYDFile();
-            csyd.ShowDialog();
-            csyd.Dispose();
-            csyd = null;
-            ClearMemory();
-            return;
-        }
-
-        private void 文件同步TToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            FileSync.FileSync fs = new FileSync.FileSync();
-            fs.ShowDialog();
-            fs.Dispose();
-            ClearMemory();
-            return;
-        }
-
+   
         private void 移动到ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
